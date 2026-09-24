@@ -282,7 +282,7 @@
                   <span>LAT 45.0832° N, 13.6308° E</span>
                 </div>
                 <h3 id="hero-img-title" class="font-serif text-xl font-bold">如水滴探入蔚藍的威尼斯山城</h3>
-                <p id="hero-img-desc" class="text-xs text-stone-200 mt-1 line-clamp-2 font-serif">
+                <p id="hero-img-desc" class="text-xs text-stone-200 mt-1 font-serif leading-relaxed">
                   從亞得里亞海遠眺羅維尼老城，紅瓦屋舍緊簇如層疊寶石，聖尤菲米亞鐘樓直指蒼穹。
                 </p>
               </div>
@@ -929,7 +929,7 @@
           <div class="p-5">
             <span class="text-xs font-cinzel text-rovinj-gold font-bold">AERIAL & HARBOR</span>
             <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">老城半島全景與亞得里亞海</h4>
-            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">從海面遠眺羅維尼老城，展現中世紀避難島嶼的空間奇蹟。</p>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif leading-relaxed">從海面遠眺羅維尼老城，展現中世紀避難島嶼的空間奇蹟。</p>
           </div>
         </div>
 
@@ -941,7 +941,7 @@
           <div class="p-5">
             <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">SACRED ARCHITECTURE</span>
             <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">聖尤菲米亞大教堂與 60 米鐘樓</h4>
-            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">頂峰守護聖女與 800 年神秘漂浮大理石石棺安放地。</p>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif leading-relaxed">頂峰守護聖女與 800 年神秘漂浮大理石石棺安放地。</p>
           </div>
         </div>
 
@@ -953,7 +953,7 @@
           <div class="p-5">
             <span class="text-xs font-cinzel text-rovinj-venetian font-bold">VENETIAN HERITAGE</span>
             <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">巴爾比之門 (Arco dei Balbi)</h4>
-            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">取代古老吊橋的巴洛克門戶，銘刻威尼斯五百年統治記號。</p>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif leading-relaxed">取代古老吊橋的巴洛克門戶，銘刻威尼斯五百年統治記號。</p>
           </div>
         </div>
 
@@ -965,7 +965,7 @@
           <div class="p-5">
             <span class="text-xs font-cinzel text-rovinj-adriatic font-bold">UNESCO INTANGIBLE</span>
             <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">Batana 傳統平底木造漁船</h4>
-            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">2016 登錄 UNESCO 非遺優秀實踐名錄的海洋文化載體。</p>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif leading-relaxed">2016 登錄 UNESCO 非遺優秀實踐名錄的海洋文化載體。</p>
           </div>
         </div>
 
@@ -977,7 +977,7 @@
           <div class="p-5">
             <span class="text-xs font-cinzel text-rovinj-gold font-bold">ART & STREETSCAPE</span>
             <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">格里西亞藝術石階街 (Ulica Grisia)</h4>
-            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">通往山頂大教堂的中軸藝術街道，鵝卵石鋪面如鏡。</p>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif leading-relaxed">通往山頂大教堂的中軸藝術街道，鵝卵石鋪面如鏡。</p>
           </div>
         </div>
 
@@ -989,7 +989,7 @@
           <div class="p-5">
             <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">GOLDEN HOUR</span>
             <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">亞得里亞海紫金夕照</h4>
-            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">夕陽餘暉灑在老城石板上，勾勒出極東義大利的浪漫輪廓。</p>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif leading-relaxed">夕陽餘暉灑在老城石板上，勾勒出極東義大利的浪漫輪廓。</p>
           </div>
         </div>
 
@@ -1494,10 +1494,10 @@
         
         // Popup
         marker.bindPopup(`
-          <div class="p-2 font-serif max-w-[220px]">
+          <div class="p-2 font-serif max-w-[240px]">
             <span class="text-[10px] font-cinzel font-bold text-rovinj-terracotta uppercase">${poi.eraLabel}</span>
             <h4 class="text-sm font-bold text-rovinj-dark mt-0.5">${poi.title}</h4>
-            <p class="text-xs text-rovinj-slate mt-1 line-clamp-2">${poi.summary}</p>
+            <p class="text-xs text-rovinj-slate mt-1 leading-relaxed">${poi.summary}</p>
             <div class="mt-2.5 flex items-center justify-between pt-1 border-t border-rovinj-gold/20">
               <button onclick="selectPOI(${poi.id}, false); openModalForActive();" class="text-[11px] text-rovinj-venetian font-bold underline">查看完整解析 →</button>
               <button onclick="toggleSpeechPOI(${poi.id})" class="text-[11px] text-rovinj-gold font-bold flex items-center gap-1"><i class="fa-solid fa-volume-high text-[10px]"></i> 導聽</button>
@@ -1512,10 +1512,10 @@
         // Clean Vertical Sidebar Card
         const card = document.createElement('div');
         card.id = `poi-card-${poi.id}`;
-        card.className = `w-full flex-shrink-0 p-4 rounded-2xl border transition-all cursor-pointer flex gap-3.5 items-start box-border select-none ${
+        card.className = `w-full flex-shrink-0 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer box-border select-none ${
           poi.id === activePOI.id 
             ? 'bg-white border-rovinj-gold shadow-md ring-1 ring-rovinj-gold' 
-            : 'bg-white/80 border-stone-200 hover:border-rovinj-gold/50 hover:bg-white'
+            : 'bg-white/90 border-stone-200 hover:border-rovinj-gold/50 hover:bg-white'
         }`;
         
         card.onclick = () => {
@@ -1523,24 +1523,32 @@
         };
 
         card.innerHTML = `
-          <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 relative border border-rovinj-gold/30 shadow-sm mt-0.5 pointer-events-none select-none">
-            <img src="${poi.image}" alt="${poi.title}" draggable="false" class="w-full h-full object-cover pointer-events-none" />
-            <span class="absolute top-1 left-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] text-white shadow-md" style="background-color: ${poi.color};">
-              <i class="fa-solid ${poi.iconClass}"></i>
-            </span>
-          </div>
-          <div class="flex-grow min-w-0 pointer-events-none">
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-[9px] font-cinzel uppercase px-1.5 py-0.2 rounded bg-rovinj-dark/5 text-rovinj-terracotta font-bold">${poi.eraLabel}</span>
-              <span class="text-[10px] text-rovinj-slate font-mono">#0${poi.id}</span>
+          <div class="flex items-start gap-3">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 relative border border-rovinj-gold/30 shadow-sm mt-0.5">
+              <img src="${poi.image}" alt="${poi.title}" draggable="false" class="w-full h-full object-cover" />
+              <span class="absolute top-1 left-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] text-white shadow-md" style="background-color: ${poi.color};">
+                <i class="fa-solid ${poi.iconClass}"></i>
+              </span>
             </div>
-            <h4 class="font-serif text-sm font-bold text-rovinj-dark leading-snug mt-1 break-words">${poi.title}</h4>
-            <p class="text-xs text-rovinj-slate font-serif leading-relaxed mt-1 line-clamp-2">${poi.summary}</p>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-[9px] font-cinzel uppercase px-1.5 py-0.5 rounded bg-rovinj-dark/5 text-rovinj-terracotta font-bold tracking-wider">${poi.eraLabel}</span>
+                <span class="text-[11px] text-rovinj-gold font-mono font-bold">#0${poi.id}</span>
+              </div>
+              <h4 class="font-serif text-sm font-bold text-rovinj-dark leading-snug mt-1 break-words">${poi.title}</h4>
+            </div>
           </div>
-          <div class="flex flex-col items-center justify-between self-stretch flex-shrink-0">
-            <i class="fa-solid fa-chevron-right text-xs text-stone-300 mt-1"></i>
-            <button onclick="event.stopPropagation(); toggleSpeechPOI(${poi.id})" id="card-audio-btn-${poi.id}" class="p-1 rounded-lg bg-rovinj-gold/15 text-rovinj-gold hover:bg-rovinj-gold/30 text-[10px] transition" title="導覽語音">
-              <i class="fa-solid fa-volume-high"></i>
+          <div class="mt-2.5 pt-2 border-t border-stone-100">
+            <p class="text-xs text-rovinj-slate font-serif leading-relaxed break-words">${poi.summary}</p>
+          </div>
+          <div class="mt-2.5 flex items-center justify-between pt-1.5 border-t border-rovinj-gold/15">
+            <button onclick="event.stopPropagation(); selectPOI(${poi.id}, false); openModalForActive();" class="text-[11px] text-rovinj-venetian font-bold hover:underline flex items-center gap-1">
+              <span>深度考證</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+            <button onclick="event.stopPropagation(); toggleSpeechPOI(${poi.id})" id="card-audio-btn-${poi.id}" class="px-2.5 py-1 rounded-lg bg-rovinj-gold/15 text-rovinj-gold hover:bg-rovinj-gold/30 text-xs font-medium flex items-center gap-1.5 transition" title="導覽語音">
+              <i class="fa-solid fa-volume-high text-[11px]"></i>
+              <span>導覽</span>
             </button>
           </div>
         `;
@@ -1564,11 +1572,11 @@
 
       // Update Sidebar Cards
       document.querySelectorAll('[id^="poi-card-"]').forEach(el => {
-        el.className = 'w-full flex-shrink-0 p-4 rounded-2xl border transition-all cursor-pointer flex gap-3.5 items-start box-border select-none bg-white/80 border-stone-200 hover:border-rovinj-gold/50 hover:bg-white';
+        el.className = 'w-full flex-shrink-0 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer box-border select-none bg-white/90 border-stone-200 hover:border-rovinj-gold/50 hover:bg-white';
       });
       const activeCard = document.getElementById(`poi-card-${id}`);
       if (activeCard) {
-        activeCard.className = 'w-full flex-shrink-0 p-4 rounded-2xl border transition-all cursor-pointer flex gap-3.5 items-start box-border select-none bg-white border-rovinj-gold shadow-md ring-1 ring-rovinj-gold';
+        activeCard.className = 'w-full flex-shrink-0 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer box-border select-none bg-white border-rovinj-gold shadow-md ring-1 ring-rovinj-gold';
         activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
 
