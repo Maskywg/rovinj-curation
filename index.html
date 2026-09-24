@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>羅維尼 Rovinj (Rovigno) 城市走讀誌 ｜ 極東義大利・數位策展深旅</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+TC:wght@300;400;600;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Leaflet.js CSS & JS CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rovinj: {
+              stone: '#F4EFE6',
+              paper: '#FAF6EE',
+              cream: '#FDFBF7',
+              terracotta: '#B34A38',
+              venetian: '#942923',
+              gold: '#C89B38',
+              warmgold: '#D9AB43',
+              adriatic: '#0E405F',
+              sea: '#1A6B8A',
+              deepsea: '#08253B',
+              dark: '#161A1D',
+              charcoal: '#242A2F',
+              slate: '#5E6B77',
+              sage: '#5B7A6A'
+            }
+          },
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            cormorant: ['Cormorant Garamond', 'serif'],
+            serif: ['Noto Serif TC', 'Cormorant Garamond', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          },
+          boxShadow: {
+            'glow-gold': '0 0 25px rgba(200, 155, 56, 0.35)',
+            'paper-card': '0 8px 25px -4px rgba(22, 26, 29, 0.08), 0 3px 8px rgba(0,0,0,0.02)',
+            'museum': '0 15px 40px rgba(14, 64, 95, 0.12)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #FAF6EE; }
+    ::-webkit-scrollbar-thumb { background: #C89B38; border-radius: 4px; }
+
+    /* Prominent Sidebar Card List Scrollbar */
+    #poi-card-container {
+      scrollbar-width: thin;
+      scrollbar-color: #B34A38 rgba(200, 155, 56, 0.18);
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+    }
+    #poi-card-container:active {
+      cursor: grabbing;
+    }
+    #poi-card-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    #poi-card-container::-webkit-scrollbar-track {
+      background: rgba(200, 155, 56, 0.15);
+      border-radius: 8px;
+    }
+    #poi-card-container::-webkit-scrollbar-thumb {
+      background: #B34A38;
+      border-radius: 8px;
+      border: 2px solid #FAF6EE;
+    }
+    #poi-card-container::-webkit-scrollbar-thumb:hover {
+      background: #942923;
+    }
+
+    /* OpenStreetMap Pure Integration & Attribution */
+    .leaflet-control-attribution {
+      display: none !important;
+    }
+
+    /* Parchment Background Texture */
+    .bg-parchment {
+      background-color: #FAF6EE;
+      background-image: radial-gradient(#d8cebe 0.75px, transparent 0.75px), radial-gradient(#d8cebe 0.75px, #FAF6EE 0.75px);
+      background-size: 26px 26px;
+      background-position: 0 0, 13px 13px;
+    }
+
+    /* Custom Leaflet Marker */
+    .custom-curator-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+      border: 2px solid #FFFFFF;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+    .custom-curator-marker:hover, .custom-curator-marker.active-marker {
+      transform: scale(1.35);
+      z-index: 1000 !important;
+      border-color: #D9AB43;
+      box-shadow: 0 0 22px rgba(217, 171, 67, 0.95);
+    }
+
+    /* Leaflet Popup Custom Styling */
+    .leaflet-popup-content-wrapper {
+      background: #FAF6EE;
+      border: 1px solid #C89B38;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      padding: 2px;
+    }
+    .leaflet-popup-tip {
+      background: #FAF6EE;
+    }
+
+    /* Shimmer Effect */
+    @keyframes goldShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .gold-shimmer {
+      background: linear-gradient(90deg, #C89B38 0%, #FFF5D6 50%, #C89B38 100%);
+      background-size: 200% 100%;
+      animation: goldShimmer 4s infinite linear;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .glass-nav {
+      background: rgba(250, 246, 238, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(200, 155, 56, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-parchment text-rovinj-dark font-sans antialiased selection:bg-rovinj-gold selection:text-white">
+
+  <!-- ================= TOP CURATOR NAV BAR ================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full bg-rovinj-dark text-rovinj-gold flex items-center justify-center font-cinzel text-xl font-bold shadow-md border border-rovinj-gold/40">
+          <i class="fa-solid fa-sailboat text-sm text-rovinj-gold"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-cinzel tracking-wider text-[11px] uppercase px-2 py-0.5 rounded bg-rovinj-terracotta/10 text-rovinj-terracotta font-bold border border-rovinj-terracotta/20">極東義大利・數位策展深旅</span>
+            <span class="text-xs text-rovinj-slate font-cormorant italic hidden sm:inline">UNESCO Batana Eco-Museum & Venetian Istria</span>
+          </div>
+          <h1 class="font-serif font-black text-lg sm:text-xl text-rovinj-dark tracking-tight leading-none mt-0.5">
+            羅維尼 <span class="font-cinzel text-sm font-semibold text-rovinj-slate">ROVINJ (ROVIGNO)</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs & Audio toggle -->
+      <div class="flex items-center space-x-2 sm:space-x-4">
+        <nav class="hidden lg:flex items-center space-x-1 text-sm font-medium">
+          <a href="#historical-significance" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">歷史定位</a>
+          <a href="#curator-thesis" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">策展觀點</a>
+          <a href="#geo-semiotics" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">地質潮汐</a>
+          <a href="#interactive-atlas" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">互動地圖</a>
+          <a href="#deep-reading" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">五重疊層</a>
+          <a href="#gourmet-curation" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">舌尖風土</a>
+          <a href="#visual-gallery" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">視覺典藏</a>
+          <a href="#field-matrix" class="px-3 py-1.5 rounded-full text-rovinj-charcoal hover:text-rovinj-venetian hover:bg-rovinj-stone/80 transition-all">光影矩陣</a>
+        </nav>
+
+        <!-- Ambient Sound Synthesizer & Voice Narration Control Group -->
+        <div class="flex items-center gap-1.5">
+          <!-- Voice Narration Stop Button (Dynamic badge) -->
+          <button id="stop-speech-btn" onclick="stopAllSpeech()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rovinj-terracotta text-white hover:bg-rovinj-venetian shadow-md transition-all animate-pulse" title="停止當前語音導覽朗讀">
+            <i class="fa-solid fa-circle-stop text-xs"></i>
+            <span>停止導覽</span>
+          </button>
+
+          <!-- Ambient Sound Synthesizer (Adriatic Sea Waves & Venetian Bell) -->
+          <button id="ambient-audio-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rovinj-dark text-rovinj-gold hover:bg-rovinj-charcoal border border-rovinj-gold/30 shadow-sm transition-all" title="點擊切換亞得里亞海潮汐與聖尤菲米亞古鐘情境音">
+            <i class="fa-solid fa-water text-xs"></i>
+            <span id="audio-btn-label">海潮與鐘鳴：開</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION (EDITORIAL COVER STYLE) ================= -->
+  <section class="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden border-b border-rovinj-gold/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        
+        <!-- Left: Editorial Text -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-gold/15 border border-rovinj-gold/40 text-rovinj-charcoal text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-rovinj-gold animate-ping"></span>
+            UNESCO 2016 優秀保護實踐名錄 ｜ 亞得里亞海上的水滴孤島傳奇
+          </div>
+
+          <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-black text-rovinj-dark tracking-tight leading-[1.18]">
+            以<span class="text-rovinj-terracotta">海島的孤絕</span>，<br>
+            借<span class="gold-shimmer">聖馬可的翅膀</span>，<br>
+            在<span class="text-rovinj-adriatic">蔚藍亞得里亞</span>永恆靠岸。
+          </h2>
+
+          <p class="font-cormorant text-xl sm:text-2xl text-rovinj-slate italic leading-relaxed border-l-2 border-rovinj-gold pl-4">
+            “An island carved by the sea, anchored by a floating marble sarcophagus, where Venetian facades rise straight from the emerald tide.”
+          </p>
+
+          <p class="text-base sm:text-lg text-rovinj-charcoal/90 leading-relaxed font-serif">
+            走進羅維尼（義大利語：<strong>Rovigno</strong>），你站在一座 1763 年才填海相連的原生島嶼上。整座山丘如螺殼般盤旋而上，高聳的 60 米聖馬可式鐘樓頂端，4.7 米高的青銅聖尤菲米亞風向標指引著亞得里亞海風。磨得如鏡面般透亮的石灰岩小巷、緊貼浪濤的威尼斯式彩色窗櫺，構成了極東義大利最深情的海洋樂章。
+          </p>
+
+          <!-- Quick Stats Grid -->
+          <div class="grid grid-cols-3 gap-3 pt-2">
+            <div class="bg-white/90 border border-rovinj-gold/25 rounded-2xl p-3.5 shadow-sm text-center">
+              <span class="block font-cinzel text-2xl font-bold text-rovinj-terracotta">1763</span>
+              <span class="text-xs text-rovinj-slate font-serif">填海連島之年</span>
+            </div>
+            <div class="bg-white/90 border border-rovinj-gold/25 rounded-2xl p-3.5 shadow-sm text-center">
+              <span class="block font-cinzel text-2xl font-bold text-rovinj-gold">60 m</span>
+              <span class="text-xs text-rovinj-slate font-serif">聖馬可式鐘樓</span>
+            </div>
+            <div class="bg-white/90 border border-rovinj-gold/25 rounded-2xl p-3.5 shadow-sm text-center">
+              <span class="block font-cinzel text-2xl font-bold text-rovinj-venetian">500 年</span>
+              <span class="text-xs text-rovinj-slate font-serif">威尼斯海洋統治</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap gap-3 pt-2">
+            <a href="#interactive-atlas" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rovinj-venetian text-white font-medium hover:bg-rovinj-terracotta shadow-museum transition-all">
+              <i class="fa-solid fa-map-location-dot"></i>
+              探索互動走讀地圖
+            </a>
+            <a href="#curator-thesis" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-rovinj-dark border border-rovinj-charcoal/20 font-medium hover:bg-rovinj-stone transition-all">
+              <i class="fa-solid fa-compass-drafting"></i>
+              解碼策展四大觀點
+            </a>
+            <button id="hero-intro-audio-btn" onclick="toggleIntroduction()" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-rovinj-gold/15 text-rovinj-dark border border-rovinj-gold/40 hover:bg-rovinj-gold/25 font-medium transition-all" title="語音導聆">
+              <i class="fa-solid fa-volume-high text-rovinj-gold"></i>
+              <span>聆聽策展人導聆</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Curated Photo Plate -->
+        <div class="lg:col-span-5 relative">
+          <div class="relative bg-white rounded-3xl p-3.5 shadow-museum border border-rovinj-gold/30">
+            
+            <!-- Main Photo Viewport -->
+            <div class="relative h-80 sm:h-96 rounded-2xl overflow-hidden group">
+              <img id="hero-main-img" src="./images/rovinj_hero.jpg" alt="Rovinj Old Town view" class="w-full h-full object-cover transition-all duration-500" />
+              
+              <div class="absolute inset-0 bg-gradient-to-t from-rovinj-dark/90 via-rovinj-dark/25 to-transparent"></div>
+
+              <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <div class="flex items-center justify-between text-xs font-cinzel text-rovinj-gold mb-1">
+                  <span id="hero-img-tag">ARCHIVAL CAPTURE</span>
+                  <span>LAT 45.0832° N, 13.6308° E</span>
+                </div>
+                <h3 id="hero-img-title" class="font-serif text-xl font-bold">如水滴探入蔚藍的威尼斯山城</h3>
+                <p id="hero-img-desc" class="text-xs text-stone-200 mt-1 line-clamp-2 font-serif">
+                  從亞得里亞海遠眺羅維尼老城，紅瓦屋舍緊簇如層疊寶石，聖尤菲米亞鐘樓直指蒼穹。
+                </p>
+              </div>
+            </div>
+
+            <!-- Authentic Thumbnail Selector Strip -->
+            <div class="grid grid-cols-4 gap-2 mt-3">
+              <button onclick="changeHeroImage('./images/rovinj_hero.jpg', '如水滴探入蔚藍的威尼斯山城', '從亞得里亞海遠眺羅維尼老城，紅瓦屋舍緊簇如層疊寶石，聖尤菲米亞鐘樓直指蒼穹。', 'PANORAMA VIEW')" class="h-16 rounded-xl overflow-hidden border-2 border-rovinj-gold focus:outline-none transition-all">
+                <img src="./images/rovinj_hero.jpg" class="w-full h-full object-cover" alt="Panorama view">
+              </button>
+              <button onclick="changeHeroImage('./images/st_euphemia.jpg', '聖尤菲米亞大教堂與鐘樓', '仿威尼斯聖馬可鐘樓建立的 60 米高塔，頂部供奉可隨風轉向的守護聖女銅像。', 'ST. EUPHEMIA')" class="h-16 rounded-xl overflow-hidden border border-rovinj-gold/40 hover:border-rovinj-gold focus:outline-none transition-all">
+                <img src="./images/st_euphemia.jpg" class="w-full h-full object-cover" alt="St Euphemia">
+              </button>
+              <button onclick="changeHeroImage('./images/balbi_arch.jpg', '巴爾比之門・聖馬可飛獅', '1679 年落成的巴洛克老城門，拱頂雕刻象徵威尼斯統治的飛獅與東方戰士頭像。', 'BALBI ARCH')" class="h-16 rounded-xl overflow-hidden border border-rovinj-gold/40 hover:border-rovinj-gold focus:outline-none transition-all">
+                <img src="./images/balbi_arch.jpg" class="w-full h-full object-cover" alt="Balbi Arch">
+              </button>
+              <button onclick="changeHeroImage('./images/batana_boat.jpg', '非遺平底木船 Batana', '入選 UNESCO 非遺保護名錄的傳統平底木造漁船，承載五百年漁航與 Bitinada 漁唱。', 'BATANA BOAT')" class="h-16 rounded-xl overflow-hidden border border-rovinj-gold/40 hover:border-rovinj-gold focus:outline-none transition-all">
+                <img src="./images/batana_boat.jpg" class="w-full h-full object-cover" alt="Batana Boat">
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HISTORICAL SIGNIFICANCE & CORE ATTRIBUTES ================= -->
+  <section id="historical-significance" class="py-20 bg-white/75 border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-terracotta/10 border border-rovinj-terracotta/30 text-rovinj-terracotta text-xs font-semibold mb-3">
+          <i class="fa-solid fa-landmark-dome text-xs"></i>
+          HISTORICAL FRAMEWORK ｜ 歷史定位與地理核心
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-rovinj-dark tracking-tight">
+          從海上避難孤島到威尼斯最耀眼的衛城
+        </h2>
+        <p class="text-rovinj-slate text-sm sm:text-base mt-3 font-serif leading-relaxed">
+          羅維尼的命運始終與波濤緊扣：它曾是抵禦斯拉夫與阿瓦爾人掠奪的孤懸岩礁（Arupium / Ruvigno），後成為威尼斯共和國最重要的引航員與水手重鎮，至今依然是地中海少數保留完好雙語威尼斯方言的活態古城。
+        </p>
+      </div>
+
+      <!-- 3 Pillars Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Pillar 1 -->
+        <div class="bg-rovinj-cream border border-rovinj-gold/20 rounded-3xl p-8 shadow-paper-card relative group hover:-translate-y-1.5 transition duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-rovinj-terracotta/10 text-rovinj-terracotta flex items-center justify-center text-2xl mb-6 group-hover:bg-rovinj-terracotta group-hover:text-white transition">
+            <i class="fa-solid fa-archway"></i>
+          </div>
+          <span class="text-xs font-cinzel text-rovinj-gold font-bold tracking-widest block mb-1">STRATUM 01</span>
+          <h3 class="font-serif text-xl font-bold text-rovinj-dark mb-3">1763 填海連島與垂直螺殼迷宮</h3>
+          <p class="text-sm text-rovinj-charcoal/80 leading-relaxed font-serif">
+            在 18 世紀前，羅維尼是一座隔著窄海峽（Canale della Roggia）的獨立橢圓小島。為容納數千避難居民，建築沿山丘極度稠密垂直疊建，形成無車輛通行的同心圓螺旋階梯網絡。
+          </p>
+          <div class="mt-6 pt-4 border-t border-rovinj-gold/15 flex items-center justify-between text-xs text-rovinj-slate font-serif">
+            <span>地理形構</span>
+            <span class="font-bold text-rovinj-terracotta">島嶼 → 水滴半島</span>
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="bg-rovinj-cream border border-rovinj-gold/20 rounded-3xl p-8 shadow-paper-card relative group hover:-translate-y-1.5 transition duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-rovinj-adriatic/10 text-rovinj-adriatic flex items-center justify-center text-2xl mb-6 group-hover:bg-rovinj-adriatic group-hover:text-white transition">
+            <i class="fa-solid fa-ship"></i>
+          </div>
+          <span class="text-xs font-cinzel text-rovinj-gold font-bold tracking-widest block mb-1">STRATUM 02</span>
+          <h3 class="font-serif text-xl font-bold text-rovinj-dark mb-3">威尼斯 Stato da Màr 海疆前哨</h3>
+          <p class="text-sm text-rovinj-charcoal/80 leading-relaxed font-serif">
+            自 1283 年宣誓效忠威尼斯，羅維尼為共和國提供最英勇的水手與石材。城內處處鐫刻聖馬可飛獅，巴爾比之門與沿岸堡壘牢牢扼守著亞得里亞海航道。
+          </p>
+          <div class="mt-6 pt-4 border-t border-rovinj-gold/15 flex items-center justify-between text-xs text-rovinj-slate font-serif">
+            <span>統治年代</span>
+            <span class="font-bold text-rovinj-adriatic">1283 – 1797 (514年)</span>
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="bg-rovinj-cream border border-rovinj-gold/20 rounded-3xl p-8 shadow-paper-card relative group hover:-translate-y-1.5 transition duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-rovinj-gold/15 text-rovinj-gold flex items-center justify-center text-2xl mb-6 group-hover:bg-rovinj-gold group-hover:text-white transition">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <span class="text-xs font-cinzel text-rovinj-gold font-bold tracking-widest block mb-1">STRATUM 03</span>
+          <h3 class="font-serif text-xl font-bold text-rovinj-dark mb-3">UNESCO 非遺 Batana 漁航生態系</h3>
+          <p class="text-sm text-rovinj-charcoal/80 leading-relaxed font-serif">
+            2016 年登錄聯合國教科文組織非物質文化遺產優秀保護實踐名錄。Batana 平底木帆船、Spàcio 傳統酒窖與 Bitinada 漁人複音合唱，使古老海洋記憶鮮活延續。
+          </p>
+          <div class="mt-6 pt-4 border-t border-rovinj-gold/15 flex items-center justify-between text-xs text-rovinj-slate font-serif">
+            <span>非遺登錄</span>
+            <span class="font-bold text-rovinj-gold">UNESCO Register 2016</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= CURATOR'S THESES (DEEP ESSAYS & SCHOLARLY PERSPECTIVES) ================= -->
+  <section id="curator-thesis" class="py-24 bg-parchment border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div>
+          <span class="text-xs font-cinzel font-bold text-rovinj-terracotta tracking-widest block mb-2">CURATORIAL THESES</span>
+          <h2 class="font-serif text-3xl sm:text-5xl font-black text-rovinj-dark">
+            走讀四重奏：解鎖羅維尼的空間密碼
+          </h2>
+        </div>
+        <p class="text-sm text-rovinj-slate max-w-md font-serif">
+          不只是打卡拍照的渡假明信片，羅維尼是一座用石頭與潮汐寫成的地中海人類學典範。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        
+        <!-- Thesis 1: 消失的海峽與垂直迷宮 -->
+        <article class="bg-white rounded-3xl p-8 sm:p-10 shadow-paper-card border border-rovinj-gold/25 space-y-5">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-rovinj-terracotta text-white flex items-center justify-center font-cinzel font-bold text-sm">I</span>
+            <h3 class="font-serif text-2xl font-bold text-rovinj-dark">消失的海峽：從防禦孤島到水滴半島的空間革命</h3>
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            在 1763 年前，羅維尼（Rovigno）本是一座完全脫離大陸的橢圓形石灰岩孤島，與陸地之間隔著淺海峽。中世紀時，為了躲避海盜與瘟疫，居民在僅 0.1 平方公里的島礁上展開了極致的空間爭奪戰。
+          </p>
+          <div class="bg-rovinj-stone/60 p-4 rounded-2xl border-l-4 border-rovinj-terracotta text-xs leading-relaxed font-serif text-rovinj-charcoal">
+            <strong>空間特徵：</strong>屋舍不設地基與後院，緊貼海浪峭壁垂直疊築，房屋彼此背靠背支撐。著名的 <strong>Grisia 街</strong> 與同心環狀階梯，正是居民沿山體向頂端聖殿攀升的垂直中軸。
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            18 世紀威尼斯政府將海峽填平後，原先的入島防禦吊橋被 <strong>巴爾比之門 (Balbi's Arch)</strong> 所取代，使孤島蛻變為今日如水滴般優雅伸入亞得里亞海的半島。
+          </p>
+        </article>
+
+        <!-- Thesis 2: 風向上的殉道少女 -->
+        <article class="bg-white rounded-3xl p-8 sm:p-10 shadow-paper-card border border-rovinj-gold/25 space-y-5">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-rovinj-gold text-white flex items-center justify-center font-cinzel font-bold text-sm">II</span>
+            <h3 class="font-serif text-2xl font-bold text-rovinj-dark">漂浮的石棺：聖尤菲米亞奇蹟與 4.7 米風向標</h3>
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            西元 800 年 7 月 13 日清晨，傳說一具沉重無比的羅馬大理石石棺在驚濤駭浪中奇蹟般漂抵羅維尼海灘。全城的壯漢與牛群皆無法移動，最終由一名純潔孩童牽著兩頭小牛，輕盈地將石棺拉上山巔，石棺內正是西元 304 年殉道的聖女尤菲米亞（Sveta Eufemija）。
+          </p>
+          <div class="bg-rovinj-stone/60 p-4 rounded-2xl border-l-4 border-rovinj-gold text-xs leading-relaxed font-serif text-rovinj-charcoal">
+            <strong>鐘樓風向符號：</strong>1758 年，威尼斯工匠在 60 米鐘樓頂安裝了一尊高達 4.7 公尺的鍍金青銅聖尤菲米亞雕像。她手持殉道棕櫚葉，隨著亞得里亞海的 <strong>Bora 寒風</strong> 與 <strong>Jugo 南風</strong> 360 度旋轉，成為千百年來漁民判斷風向與祈求平安的燈塔。
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            這具重達數噸的神秘石棺至今仍安放在教堂主祭壇後方的聖匣室內，成為整個伊斯特利亞半島最重要的朝聖核心。
+          </p>
+        </article>
+
+        <!-- Thesis 3: 威尼斯聖馬可飛獅的守望 -->
+        <article class="bg-white rounded-3xl p-8 sm:p-10 shadow-paper-card border border-rovinj-gold/25 space-y-5">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-rovinj-venetian text-white flex items-center justify-center font-cinzel font-bold text-sm">III</span>
+            <h3 class="font-serif text-2xl font-bold text-rovinj-dark">飛獅的凝視：威尼斯海洋帝國的印記與伊斯特利亞方言</h3>
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            五百年來，羅維尼是威尼斯共和國「海洋領地」（Stato da Màr）的心臟之一。在 <strong>巴爾比之門 (Arco dei Balbi, 1679)</strong> 頂端，鐫刻著威尼斯總督巴爾比家族的紋章，以及展開福音書的聖馬可飛獅（Leone di San Marco）。
+          </p>
+          <div class="bg-rovinj-stone/60 p-4 rounded-2xl border-l-4 border-rovinj-venetian text-xs leading-relaxed font-serif text-rovinj-charcoal">
+            <strong>雙重文化凝結：</strong>老城門兩側分別雕刻威尼斯人與鄂圖曼土耳其人頭像，見證東地中海十字路口的歷史征戰；至今街頭路標皆採克羅埃西亞語與義大利語雙語並列，長者仍能操持罕見的古威尼斯-伊斯特利亞方言（Istriot）。
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            建築窗台上的三葉拱飾、石雕獅頭流水口、以及與威尼斯聖馬可鐘樓同出一轍的磚石結構，讓羅維尼贏得了「亞得里亞海的小威尼斯」之名。
+          </p>
+        </article>
+
+        <!-- Thesis 4: UNESCO Batana 平底船與漁航生態系 -->
+        <article class="bg-white rounded-3xl p-8 sm:p-10 shadow-paper-card border border-rovinj-gold/25 space-y-5">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-rovinj-adriatic text-white flex items-center justify-center font-cinzel font-bold text-sm">IV</span>
+            <h3 class="font-serif text-2xl font-bold text-rovinj-dark">木舟與漁唱：UNESCO 非遺 Batana 生態博物館</h3>
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            <strong>Batana</strong> 是一種船底扁平、長約 4 至 8 公尺的傳統木造單桅帆船。它專為羅維尼多淺灘與礁岩的近海海域設計，船帆上彩繪著代表各個漁民家族的幾何圖騰與色彩密碼。
+          </p>
+          <div class="bg-rovinj-stone/60 p-4 rounded-2xl border-l-4 border-rovinj-adriatic text-xs leading-relaxed font-serif text-rovinj-charcoal">
+            <strong>非遺生活三位一體：</strong>
+            <ul class="list-disc list-inside space-y-1 mt-1">
+              <li><strong>Kuća o batani（造船傳承館）：</strong>由老造船匠在港邊公開傳授全手工榫接與油灰填縫技術。</li>
+              <li><strong>Spàcio（漁人地窖）：</strong>夜幕降臨，在石造酒窖品嚐當天捕撈的沙丁魚與本地 Malvazija 白酒。</li>
+              <li><strong>Bitinada（複音漁唱）：</strong>漁民不出海時，用口技模仿曼陀林、低音大提琴並無伴奏合唱古老情歌。</li>
+            </ul>
+          </div>
+          <p class="text-sm text-rovinj-charcoal leading-relaxed font-serif">
+            2016 年被 UNESCO 列為非物質文化遺產優秀保護實踐名錄，成為全球文化遺產活化保護的典範。
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GEO & TIDAL SEMIOTICS: 三大自然地理、地質與潮汐密碼 ================= -->
+  <section id="geo-semiotics" class="py-24 bg-white/70 border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-adriatic/10 border border-rovinj-adriatic/30 text-rovinj-adriatic text-xs font-semibold mb-3">
+          <i class="fa-solid fa-water-ladder text-xs"></i>
+          GEOLOGICAL & TIDAL DECODING ｜ 三大自然地理與地質密碼
+        </div>
+        <h2 class="font-serif text-3xl sm:text-5xl font-black text-rovinj-dark tracking-tight">
+          解密海角孤島、不朽白石與亞得里亞海潮汐
+        </h2>
+        <p class="text-rovinj-slate text-sm sm:text-base mt-3 font-serif leading-relaxed">
+          為什麼羅維尼與波雷奇的古城都緊貼在突出海角？為什麼伊斯特利亞白石能泡在海水中七百年不爛？亞得里亞海到底會不會漲潮？
+        </p>
+      </div>
+
+      <!-- 3 Pillars Deep Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Deep Card 1: 為何古城都靠海突出的一端 -->
+        <article class="bg-rovinj-cream rounded-3xl p-8 border border-rovinj-gold/30 shadow-paper-card flex flex-col justify-between space-y-6 group hover:-translate-y-1.5 transition duration-300">
+          <div class="space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-rovinj-terracotta/10 text-rovinj-terracotta flex items-center justify-center text-2xl group-hover:bg-rovinj-terracotta group-hover:text-white transition">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+              <span class="text-xs font-cinzel text-rovinj-gold font-bold tracking-wider uppercase block">SEMIOTIC DECODING 01</span>
+              <h3 class="font-serif text-2xl font-bold text-rovinj-dark mt-1">為何古城皆蜷縮在海角尖端？</h3>
+              <p class="text-xs text-rovinj-slate font-serif italic mt-0.5">Peninsula Fortification & Dual Anchorages</p>
+            </div>
+            <p class="text-xs sm:text-sm text-rovinj-charcoal/90 leading-relaxed font-serif">
+              這不是偶然，而是中世紀居民在<strong>軍事防禦、避風港灣、公共衛生與海權地緣</strong>下的極致生存幾何：
+            </p>
+            <ul class="space-y-2.5 text-xs text-rovinj-charcoal font-serif">
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-terracotta mt-0.5 flex-shrink-0"></i>
+                <span><strong>一夫當關的防禦幾何：</strong>三面環海，陸地蠻族與騎兵僅能從狹窄地峽進攻，只需築起一道城牆與要塞砲塔（如五角塔、巴爾比之門）即可封鎖陸上威脅。</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-terracotta mt-0.5 flex-shrink-0"></i>
+                <span><strong>南北雙向避風錨地：</strong>海岬自然劃出南北兩座海灣，能全天候抵禦東北方的 Bora 暴風與南方的 Jugo 巨浪。</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-terracotta mt-0.5 flex-shrink-0"></i>
+                <span><strong>遠離瘧疾沼澤：</strong>海風對流旺盛且地勢高聳，避開了中世紀內陸平原死水滋生瘧疾蚊蟲的威脅。</span>
+              </li>
+            </ul>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/80 border border-rovinj-gold/20 text-[11px] font-serif text-rovinj-slate leading-relaxed">
+            💡 <strong>策展亮點：</strong>羅維尼在 1763 年前根本是一座完全孤懸海上的獨立小島，敵軍無強大海軍根本無法靠近！
+          </div>
+        </article>
+
+        <!-- Deep Card 2: 伊斯特利亞白石為何堅不可摧 -->
+        <article class="bg-rovinj-cream rounded-3xl p-8 border border-rovinj-gold/30 shadow-paper-card flex flex-col justify-between space-y-6 group hover:-translate-y-1.5 transition duration-300">
+          <div class="space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-rovinj-gold/15 text-rovinj-gold flex items-center justify-center text-2xl group-hover:bg-rovinj-gold group-hover:text-white transition">
+              <i class="fa-solid fa-gem"></i>
+            </div>
+            <div>
+              <span class="text-xs font-cinzel text-rovinj-gold font-bold tracking-wider uppercase block">SEMIOTIC DECODING 02</span>
+              <h3 class="font-serif text-2xl font-bold text-rovinj-dark mt-1">伊斯特利亞白石為何堅不可摧？</h3>
+              <p class="text-xs text-rovinj-slate font-serif italic mt-0.5">Pietra d'Istria: The Impermeable Foundation</p>
+            </div>
+            <p class="text-xs sm:text-sm text-rovinj-charcoal/90 leading-relaxed font-serif">
+              它被譽為<strong>「未經變質的大理石」</strong>，是威尼斯帝國五百年來打造水上宮殿基座唯一指定的「神級石材」：
+            </p>
+            <ul class="space-y-2.5 text-xs text-rovinj-charcoal font-serif">
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-gold mt-0.5 flex-shrink-0"></i>
+                <span><strong>微晶純淨純度高達 98%：</strong>1.4 億年前白堊紀特提斯洋淺海沉積，微晶方解石緊密嵌合，無易風化黏土。</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-gold mt-0.5 flex-shrink-0"></i>
+                <span><strong>孔隙率 < 0.5% 近乎零吸水：</strong>水分與鹽分「鑽不進去」，徹底免疫海水「鹽結晶膨脹」與冬季「凍融碎裂」。</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-gold mt-0.5 flex-shrink-0"></i>
+                <span><strong>越踩越亮的鏡面效應：</strong>受步履重壓與摩擦時，表層會形成微晶硬化保護膜（Patina），如羊脂玉般溫潤光亮。</span>
+              </li>
+            </ul>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/80 border border-rovinj-gold/20 text-[11px] font-serif text-rovinj-slate leading-relaxed">
+            🏛️ <strong>歷史鐵證：</strong>威尼斯總督宮、里亞托橋水下基座在鹹水中浸泡 700 年不朽，普拉競技場矗立 2000 年依然完好！
+          </div>
+        </article>
+
+        <!-- Deep Card 3: 亞得里亞海不會漲潮嗎？ -->
+        <article class="bg-rovinj-cream rounded-3xl p-8 border border-rovinj-gold/30 shadow-paper-card flex flex-col justify-between space-y-6 group hover:-translate-y-1.5 transition duration-300">
+          <div class="space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-rovinj-adriatic/15 text-rovinj-adriatic flex items-center justify-center text-2xl group-hover:bg-rovinj-adriatic group-hover:text-white transition">
+              <i class="fa-solid fa-water"></i>
+            </div>
+            <div>
+              <span class="text-xs font-cinzel text-rovinj-gold font-bold tracking-wider uppercase block">SEMIOTIC DECODING 03</span>
+              <h3 class="font-serif text-2xl font-bold text-rovinj-dark mt-1">亞得里亞海潮汐與衛城之謎</h3>
+              <p class="text-xs text-rovinj-slate font-serif italic mt-0.5">Seiche Resonance & Acqua Alta Mechanics</p>
+            </div>
+            <p class="text-xs sm:text-sm text-rovinj-charcoal/90 leading-relaxed font-serif">
+              亞得里亞海不僅會漲潮，更是<strong>整個地中海潮差最大、潮汐共振最劇烈</strong>的海域（高達 1 至 1.8 公尺）：
+            </p>
+            <ul class="space-y-2.5 text-xs text-rovinj-charcoal font-serif">
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-adriatic mt-0.5 flex-shrink-0"></i>
+                <span><strong>800 公里深水浴缸共振（Seiche 駐波）：</strong>狹長半封閉水槽使潮波在北端伊斯特利亞與威尼斯灣疊加放大。</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-adriatic mt-0.5 flex-shrink-0"></i>
+                <span><strong>Jugo 南風推波助瀾：</strong>秋冬強勁南風一路向北推水，造成北亞得里亞海極端暴潮（Acqua Alta）。</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-check text-rovinj-adriatic mt-0.5 flex-shrink-0"></i>
+                <span><strong>威尼斯泡水 vs. 羅維尼高踞岩礁：</strong>威尼斯建在下陷的泥質潟湖；羅維尼拔起於 35 米石灰岩海崖，潮水化為腳下浪花。</span>
+              </li>
+            </ul>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/80 border border-rovinj-gold/20 text-[11px] font-serif text-rovinj-slate leading-relaxed">
+            🌊 <strong>走讀觀察：</strong>在聖十字海門與臨海石階，可清晰看見約 1 公尺寬的深綠色藤壺潮汐水線（Tidal Watermark）！
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= INTERACTIVE LEAFLET + OPENSTREETMAP (OSM) ATLAS ================= -->
+  <section id="interactive-atlas" class="py-16 bg-white border-y border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header with Layer Filters -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rovinj-adriatic/10 border border-rovinj-adriatic/30 text-rovinj-adriatic text-xs font-cinzel font-bold">
+            <i class="fa-solid fa-map-marked-alt text-xs"></i>
+            LEAFLET.JS + OPENSTREETMAP (OSM) SYSTEM
+          </div>
+          <h2 class="font-serif text-3xl sm:text-4xl font-black text-rovinj-dark mt-2">羅維尼走讀・互動地圖系統</h2>
+          <p class="text-rovinj-slate font-serif text-sm mt-1">標準純淨 OpenStreetMap 圖層 ｜ 左右分欄雙向聯動 ｜ 點擊左側卡片或標記即時定位</p>
+        </div>
+
+        <!-- Filter Buttons by Historical Themes -->
+        <div class="flex flex-wrap gap-2" id="poi-filters">
+          <button onclick="filterMarkers('all')" class="filter-btn active-filter px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-venetian text-white shadow-sm transition-all" data-era="all">
+            全部走讀點 (10)
+          </button>
+          <button onclick="filterMarkers('landmark')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-stone text-rovinj-charcoal hover:bg-rovinj-terracotta hover:text-white transition-all" data-era="landmark">
+            <i class="fa-solid fa-landmark-dome mr-1"></i> 老城核心地標
+          </button>
+          <button onclick="filterMarkers('heritage')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-stone text-rovinj-charcoal hover:bg-rovinj-venetian hover:text-white transition-all" data-era="heritage">
+            <i class="fa-solid fa-archway mr-1"></i> 威尼斯海防遺存
+          </button>
+          <button onclick="filterMarkers('art')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-stone text-rovinj-charcoal hover:bg-rovinj-gold hover:text-white transition-all" data-era="art">
+            <i class="fa-solid fa-palette mr-1"></i> 藝術石階生活
+          </button>
+          <button onclick="filterMarkers('gourmet')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-stone text-rovinj-charcoal hover:bg-rovinj-sea hover:text-white transition-all" data-era="gourmet">
+            <i class="fa-solid fa-utensils mr-1"></i> 舌尖風土與地窖
+          </button>
+          <button onclick="filterMarkers('nature')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-stone text-rovinj-charcoal hover:bg-rovinj-sage hover:text-white transition-all" data-era="nature">
+            <i class="fa-solid fa-tree mr-1"></i> 自然海角森林
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Map Responsive Split Container (440px Fixed Left Sidebar + Flex-1 Right Map) -->
+      <div class="flex flex-col lg:flex-row gap-6 w-full items-stretch relative">
+        
+        <!-- Left Column: 440px Fixed Width Scrollable POI Cards List with Pure Vertical 10-Station Guide & Drag Lever -->
+        <div class="w-full lg:w-[440px] lg:min-w-[440px] lg:max-w-[440px] flex-shrink-0 flex flex-col h-[640px] max-h-[640px] bg-stone-50/95 rounded-3xl border border-rovinj-gold/30 shadow-paper-card p-4 overflow-hidden z-20 box-border">
+          
+          <!-- Header with Up / Down Quick Scroll Controls -->
+          <div class="flex items-center justify-between pb-3 border-b border-rovinj-stone mb-2.5 flex-shrink-0">
+            <div>
+              <span class="font-cinzel text-xs font-bold text-rovinj-terracotta uppercase tracking-wider block">
+                <i class="fa-solid fa-list-ol mr-1.5"></i> 走讀站點導覽 (10 站・直式導引)
+              </span>
+              <span class="text-[11px] text-rovinj-slate font-serif">點擊右側直式站點或拖曳拉霸切換</span>
+            </div>
+            <!-- Scroll Step Buttons -->
+            <div class="flex items-center gap-1.5">
+              <button onclick="scrollPoiList('up')" class="w-8 h-8 rounded-xl bg-white border border-rovinj-gold/30 text-rovinj-dark hover:bg-rovinj-stone hover:text-rovinj-venetian flex items-center justify-center text-xs shadow-sm transition-all" title="往上拉動">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button onclick="scrollPoiList('down')" class="w-8 h-8 rounded-xl bg-white border border-rovinj-gold/30 text-rovinj-dark hover:bg-rovinj-stone hover:text-rovinj-venetian flex items-center justify-center text-xs shadow-sm transition-all" title="往下拉動">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- POI List (Left) and Vertical 10-Station Rail & Drag Lever (Right) -->
+          <div class="flex-1 min-h-0 flex gap-2.5 items-stretch relative overflow-hidden">
+            
+            <!-- Cards Container (Scrollable) -->
+            <div id="poi-card-container" class="flex-1 flex flex-col gap-3 overflow-y-auto overflow-x-hidden pr-0.5 w-full select-none" style="min-height: 0 !important; max-height: 100% !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Right Column: Pure Vertical 10-Station Rail & Interactive Lever ("直式 10 站軌道與上下拉霸") -->
+            <div id="lever-track" class="w-10 sm:w-11 flex-shrink-0 bg-stone-200/80 hover:bg-stone-200/95 rounded-2xl border border-rovinj-gold/40 shadow-inner relative flex flex-col justify-between items-center py-2 select-none cursor-pointer transition-colors" title="直式 10 站導覽：點擊站點或按住拉霸上下拖曳">
+              <!-- Top Up Step -->
+              <button type="button" onclick="scrollPoiList('up')" class="w-7 h-5 rounded-md bg-white/90 text-rovinj-slate hover:text-rovinj-venetian flex items-center justify-center text-[9px] shadow-xs z-10 flex-shrink-0 mb-1" title="往上一站">
+                <i class="fa-solid fa-chevron-up"></i>
+              </button>
+              
+              <!-- 10 Vertical Station Nodes Container (Stacked vertically 01 to 10) -->
+              <div id="vertical-station-nodes" class="w-full flex-1 flex flex-col justify-between items-center relative py-1 z-10">
+                <!-- 10 Station vertical buttons rendered dynamically -->
+              </div>
+
+              <!-- Draggable Lever Thumb ("直式上下拉霸滑塊") -->
+              <div id="lever-thumb" class="absolute left-1 right-1 h-9 rounded-xl bg-gradient-to-r from-rovinj-terracotta to-rovinj-venetian text-white shadow-md border-2 border-white/90 flex items-center justify-center cursor-grab active:cursor-grabbing hover:brightness-110 select-none z-20 pointer-events-auto" style="top: 32px;">
+                <div class="flex items-center gap-1 leading-none pointer-events-none">
+                  <i class="fa-solid fa-grip-vertical text-[8px] text-rovinj-gold/90"></i>
+                  <span id="lever-thumb-text" class="text-[9px] font-cinzel font-bold tracking-tight">01</span>
+                </div>
+              </div>
+
+              <!-- Bottom Down Step -->
+              <button type="button" onclick="scrollPoiList('down')" class="w-7 h-5 rounded-md bg-white/90 text-rovinj-slate hover:text-rovinj-venetian flex items-center justify-center text-[9px] shadow-xs z-10 flex-shrink-0 mt-1" title="往下一站">
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Footer Scroll Cue / Fast Navigation Indicator -->
+          <div class="pt-2.5 mt-2 border-t border-rovinj-stone flex items-center justify-between text-[11px] text-rovinj-slate font-serif flex-shrink-0">
+            <span id="scroll-progress-label">↕ 右側直式 10 站軌道可點選或拉動</span>
+            <button onclick="scrollPoiList('down')" class="text-rovinj-venetian font-bold hover:underline flex items-center gap-1">
+              <span>看下一站</span>
+              <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Leaflet OSM Map -->
+        <div class="w-full lg:flex-1 min-w-0 h-[640px] rounded-3xl overflow-hidden border border-rovinj-gold/30 shadow-museum relative z-10">
+          <!-- The Leaflet Map Viewport -->
+          <div id="rovinj-map" class="w-full h-full"></div>
+          
+          <!-- Route Overview Button -->
+          <button onclick="fitMapToRoute()" class="absolute top-4 left-4 z-[500] bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-rovinj-gold/40 text-xs font-cinzel font-bold text-rovinj-charcoal hover:bg-rovinj-stone shadow-md transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-arrows-to-eye text-rovinj-venetian"></i>
+            <span>全線總覽</span>
+          </button>
+
+          <!-- Top Right Legend -->
+          <div class="absolute top-4 right-4 z-[500] bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-rovinj-gold/40 text-xs text-rovinj-charcoal shadow-lg pointer-events-none hidden sm:block">
+            <div class="flex items-center gap-2 font-cinzel text-rovinj-terracotta font-bold mb-0.5">
+              <i class="fa-solid fa-route"></i>
+              ROVINJ PENINSULA WALKING AXIS
+            </div>
+            <div class="text-[11px] text-rovinj-slate font-serif">紅金虛線：老城垂直攀升與海防軸線 (1.2km)</div>
+          </div>
+
+          <!-- Bottom Floating Active Inspector Bar -->
+          <div id="map-active-badge" class="absolute bottom-4 left-4 right-4 z-[500] bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-rovinj-gold/40 shadow-2xl transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span id="badge-icon" class="w-9 h-9 rounded-xl bg-rovinj-venetian text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  <i class="fa-solid fa-landmark-dome"></i>
+                </span>
+                <div>
+                  <h4 id="badge-title" class="font-serif text-base font-bold text-rovinj-dark leading-tight">聖尤菲米亞大教堂</h4>
+                  <p id="badge-subtitle" class="text-xs text-rovinj-slate font-cinzel">Sveta Eufemija • 60m Venetian Campanile</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openModalForActive()" class="px-4 py-2 rounded-xl bg-rovinj-venetian hover:bg-rovinj-terracotta text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                  <span>深度解析</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FIVE HISTORICAL STRATA ================= -->
+  <section id="deep-reading" class="py-24 bg-parchment border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-gold/15 border border-rovinj-gold/40 text-rovinj-charcoal text-xs font-semibold mb-3">
+          <i class="fa-solid fa-layer-group text-xs"></i>
+          TEMPORAL ARCHAEOLOGY ｜ 五重歷史時空層疊
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-rovinj-dark tracking-tight">
+          層層剝開羅維尼的兩千年時光地層
+        </h2>
+        <p class="text-rovinj-slate text-sm sm:text-base mt-2 font-serif">
+          羅維尼不僅僅是一座觀光小鎮，每一塊石階與每一面石牆都承載著不同文明的重疊記憶。
+        </p>
+      </div>
+
+      <!-- Timeline Tabs -->
+      <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-12">
+        <button onclick="switchStrata(1)" id="strata-btn-1" class="strata-tab active px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-rovinj-dark text-rovinj-gold shadow-md transition-all">
+          I. 羅馬避難岩礁 (西元前-VI世紀)
+        </button>
+        <button onclick="switchStrata(2)" id="strata-btn-2" class="strata-tab px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-white text-rovinj-charcoal border border-rovinj-gold/30 hover:bg-rovinj-stone transition-all">
+          II. 聖女石棺神蹟 (西元 800)
+        </button>
+        <button onclick="switchStrata(3)" id="strata-btn-3" class="strata-tab px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-white text-rovinj-charcoal border border-rovinj-gold/30 hover:bg-rovinj-stone transition-all">
+          III. 威尼斯最寧靜共和國 (1283-1797)
+        </button>
+        <button onclick="switchStrata(4)" id="strata-btn-4" class="strata-tab px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-white text-rovinj-charcoal border border-rovinj-gold/30 hover:bg-rovinj-stone transition-all">
+          IV. 奧匈海濱與造船盛世 (1813-1918)
+        </button>
+        <button onclick="switchStrata(5)" id="strata-btn-5" class="strata-tab px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-white text-rovinj-charcoal border border-rovinj-gold/30 hover:bg-rovinj-stone transition-all">
+          V. 當代雙語活態遺產 (UNESCO 至今)
+        </button>
+      </div>
+
+      <!-- Strata Dynamic Card Display -->
+      <div id="strata-content-viewport" class="bg-white rounded-3xl p-8 sm:p-12 shadow-paper-card border border-rovinj-gold/30 transition-all duration-300">
+        <!-- Will be populated by switchStrata() -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= GOURMET & TERROIR CURATION ================= -->
+  <section id="gourmet-curation" class="py-24 bg-white/75 border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-terracotta/10 border border-rovinj-terracotta/30 text-rovinj-terracotta text-xs font-semibold mb-3">
+          <i class="fa-solid fa-utensils text-xs"></i>
+          ADRIATIC & ISTRIAN TERROIR ｜ 舌尖上的伊斯特利亞風土
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-rovinj-dark tracking-tight">
+          海潮與橡木林滋養的極致美饌
+        </h2>
+        <p class="text-rovinj-slate text-sm sm:text-base mt-2 font-serif">
+          羅維尼的美食揉合了威尼斯海鮮精髓與伊斯特利亞半島內陸的黑白松露、原生牛與黃金橄欖油。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Gourmet 1: Crni Rižot -->
+        <div class="bg-rovinj-cream rounded-3xl p-6 border border-rovinj-gold/25 shadow-paper-card flex flex-col justify-between group hover:-translate-y-2 transition duration-300">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-rovinj-dark text-rovinj-gold flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-bowl-rice"></i>
+            </div>
+            <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">SEAFOOD SPECIALTY</span>
+            <h3 class="font-serif text-xl font-bold text-rovinj-dark mt-1 mb-2">亞得里亞海黑墨魚燉飯 (Crni Rižot)</h3>
+            <p class="text-xs text-rovinj-charcoal/80 leading-relaxed font-serif">
+              以當日現撈野生墨魚囊汁熬煮伊斯特利亞香米，加入大蒜、白酒、橄欖油慢火收汁，每一口都是深邃濃郁的海洋鮮甜。
+            </p>
+          </div>
+          <div class="mt-6 pt-3 border-t border-rovinj-gold/15 text-[11px] text-rovinj-slate font-serif flex justify-between">
+            <span>在地推薦</span>
+            <span class="font-bold text-rovinj-dark">Konoba da Carmo</span>
+          </div>
+        </div>
+
+        <!-- Gourmet 2: Istrian Pasta & Truffles -->
+        <div class="bg-rovinj-cream rounded-3xl p-6 border border-rovinj-gold/25 shadow-paper-card flex flex-col justify-between group hover:-translate-y-2 transition duration-300">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-rovinj-gold/15 text-rovinj-gold flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-plate-wheat"></i>
+            </div>
+            <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">HANDMADE PASTA</span>
+            <h3 class="font-serif text-xl font-bold text-rovinj-dark mt-1 mb-2">手工捲麵佐黑白松露 (Pljukanci s tartufima)</h3>
+            <p class="text-xs text-rovinj-charcoal/80 leading-relaxed font-serif">
+              傳統掌心搓揉的手工 Pljukanci 捲麵，裹附厚郁的伊斯特利亞森林黑松露與奶油醬汁，口感彈牙，香氣繚繞不絕。
+            </p>
+          </div>
+          <div class="mt-6 pt-3 border-t border-rovinj-gold/15 text-[11px] text-rovinj-slate font-serif flex justify-between">
+            <span>產地特色</span>
+            <span class="font-bold text-rovinj-dark">Mirna 河谷野生松露</span>
+          </div>
+        </div>
+
+        <!-- Gourmet 3: Malvazija & Teran Wine -->
+        <div class="bg-rovinj-cream rounded-3xl p-6 border border-rovinj-gold/25 shadow-paper-card flex flex-col justify-between group hover:-translate-y-2 transition duration-300">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-rovinj-venetian/10 text-rovinj-venetian flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-wine-glass"></i>
+            </div>
+            <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">INDIGENOUS WINE</span>
+            <h3 class="font-serif text-xl font-bold text-rovinj-dark mt-1 mb-2">瑪爾維西亞與泰蘭酒 (Malvazija & Teran)</h3>
+            <p class="text-xs text-rovinj-charcoal/80 leading-relaxed font-serif">
+              <strong>Malvazija Istriana</strong> 帶著刺槐花香與礦物微鹹；<strong>Teran</strong> 則產自富含鐵質的紅土地（Terra Rossa），酸度明亮，充滿野櫻桃果香。
+            </p>
+          </div>
+          <div class="mt-6 pt-3 border-t border-rovinj-gold/15 text-[11px] text-rovinj-slate font-serif flex justify-between">
+            <span>佐餐推薦</span>
+            <span class="font-bold text-rovinj-dark">海鮮 / 熟成火腿 (Pršut)</span>
+          </div>
+        </div>
+
+        <!-- Gourmet 4: Extra Virgin Olive Oil -->
+        <div class="bg-rovinj-cream rounded-3xl p-6 border border-rovinj-gold/25 shadow-paper-card flex flex-col justify-between group hover:-translate-y-2 transition duration-300">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-rovinj-sage/15 text-rovinj-sage flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-bottle-droplet"></i>
+            </div>
+            <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">LIQUID GOLD</span>
+            <h3 class="font-serif text-xl font-bold text-rovinj-dark mt-1 mb-2">伊斯特利亞頂級初榨橄欖油 (Extra Virgin Olive Oil)</h3>
+            <p class="text-xs text-rovinj-charcoal/80 leading-relaxed font-serif">
+              連續多年榮獲 Flos Olei 世界頂級橄欖油評鑑最高榮譽。Buža 與 Istarska Bjelica 原生橄欖品種散發青草香與細緻辛辣感。
+            </p>
+          </div>
+          <div class="mt-6 pt-3 border-t border-rovinj-gold/15 text-[11px] text-rovinj-slate font-serif flex justify-between">
+            <span>評鑑榮譽</span>
+            <span class="font-bold text-rovinj-dark">Flos Olei 全球最佳產區</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= VISUAL GALLERY & LIGHTBOX MODAL ================= -->
+  <section id="visual-gallery" class="py-24 bg-parchment border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-venetian/10 border border-rovinj-venetian/30 text-rovinj-venetian text-xs font-semibold mb-3">
+          <i class="fa-solid fa-camera-retro text-xs"></i>
+          VISUAL ARCHIVE ｜ 視覺典藏走讀圖輯
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-rovinj-dark tracking-tight">
+          凝結在石灰岩與浪花中的地中海光影
+        </h2>
+        <p class="text-rovinj-slate text-sm sm:text-base mt-2 font-serif">
+          點擊任意影像可開啟高解析度放大燈箱與專業策展圖說。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Gallery Item 1 -->
+        <div onclick="openLightbox('./images/rovinj_hero.jpg', '老城半島全景與亞得里亞海', '從海面遠眺羅維尼老城，緊湊的紅瓦屋舍沿山丘向聖尤菲米亞鐘樓匯聚，展現中世紀避難島嶼的空間奇蹟。')" class="cursor-pointer group relative bg-white rounded-3xl overflow-hidden border border-rovinj-gold/25 shadow-paper-card">
+          <div class="h-64 overflow-hidden">
+            <img src="./images/rovinj_hero.jpg" alt="Rovinj Panorama" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          </div>
+          <div class="p-5">
+            <span class="text-xs font-cinzel text-rovinj-gold font-bold">AERIAL & HARBOR</span>
+            <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">老城半島全景與亞得里亞海</h4>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">從海面遠眺羅維尼老城，展現中世紀避難島嶼的空間奇蹟。</p>
+          </div>
+        </div>
+
+        <!-- Gallery Item 2 -->
+        <div onclick="openLightbox('./images/st_euphemia.jpg', '聖尤菲米亞大教堂與鐘樓', '矗立於山頂的 60 米高聳鐘樓，仿照威尼斯聖馬可鐘樓建造，尖頂為可隨海風旋轉的 4.7 米聖女銅像。')" class="cursor-pointer group relative bg-white rounded-3xl overflow-hidden border border-rovinj-gold/25 shadow-paper-card">
+          <div class="h-64 overflow-hidden">
+            <img src="./images/st_euphemia.jpg" alt="St. Euphemia Church" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          </div>
+          <div class="p-5">
+            <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">SACRED ARCHITECTURE</span>
+            <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">聖尤菲米亞大教堂與 60 米鐘樓</h4>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">頂峰守護聖女與 800 年神秘漂浮大理石石棺安放地。</p>
+          </div>
+        </div>
+
+        <!-- Gallery Item 3 -->
+        <div onclick="openLightbox('./images/balbi_arch.jpg', '巴爾比之門與威尼斯聖馬可飛獅', '1679 年落成的巴洛克老城門，頂部銘刻威尼斯共和國聖馬可飛獅雕刻與總督紋章。')" class="cursor-pointer group relative bg-white rounded-3xl overflow-hidden border border-rovinj-gold/25 shadow-paper-card">
+          <div class="h-64 overflow-hidden">
+            <img src="./images/balbi_arch.jpg" alt="Balbi's Arch" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          </div>
+          <div class="p-5">
+            <span class="text-xs font-cinzel text-rovinj-venetian font-bold">VENETIAN HERITAGE</span>
+            <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">巴爾比之門 (Arco dei Balbi)</h4>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">取代古老吊橋的巴洛克門戶，銘刻威尼斯五百年統治記號。</p>
+          </div>
+        </div>
+
+        <!-- Gallery Item 4 -->
+        <div onclick="openLightbox('./images/batana_boat.jpg', 'UNESCO 非遺 Batana 平底木造帆船', '羅維尼傳統的單桅平底木船，融合造船技術、家族彩色船帆與 Spàcio 地窖酒館文化。')" class="cursor-pointer group relative bg-white rounded-3xl overflow-hidden border border-rovinj-gold/25 shadow-paper-card">
+          <div class="h-64 overflow-hidden">
+            <img src="./images/batana_boat.jpg" alt="Batana Boat" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          </div>
+          <div class="p-5">
+            <span class="text-xs font-cinzel text-rovinj-adriatic font-bold">UNESCO INTANGIBLE</span>
+            <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">Batana 傳統平底木造漁船</h4>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">2016 登錄 UNESCO 非遺優秀實踐名錄的海洋文化載體。</p>
+          </div>
+        </div>
+
+        <!-- Gallery Item 5 -->
+        <div onclick="openLightbox('./images/grisia_street.jpg', '格里西亞藝術街 (Ulica Grisia)', '由磨得光滑的伊斯特利亞石灰岩鋪就的階梯巷弄，每年夏天化身亞得里亞海最大的露天畫廊。')" class="cursor-pointer group relative bg-white rounded-3xl overflow-hidden border border-rovinj-gold/25 shadow-paper-card">
+          <div class="h-64 overflow-hidden">
+            <img src="./images/grisia_street.jpg" alt="Grisia Street" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          </div>
+          <div class="p-5">
+            <span class="text-xs font-cinzel text-rovinj-gold font-bold">ART & STREETSCAPE</span>
+            <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">格里西亞藝術石階街 (Ulica Grisia)</h4>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">通往山頂大教堂的中軸藝術街道，鵝卵石鋪面如鏡。</p>
+          </div>
+        </div>
+
+        <!-- Gallery Item 6 -->
+        <div onclick="openLightbox('./images/rovinj_sunset.jpg', '亞得里亞海上的紫金日落', '羅維尼最令人屏息的時刻，夕陽將整座老城染上琥珀金紅，彩色房屋倒映在平靜如綢緞的港灣。')" class="cursor-pointer group relative bg-white rounded-3xl overflow-hidden border border-rovinj-gold/25 shadow-paper-card">
+          <div class="h-64 overflow-hidden">
+            <img src="./images/rovinj_sunset.jpg" alt="Rovinj Sunset" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          </div>
+          <div class="p-5">
+            <span class="text-xs font-cinzel text-rovinj-terracotta font-bold">GOLDEN HOUR</span>
+            <h4 class="font-serif font-bold text-rovinj-dark text-base mt-1">亞得里亞海紫金夕照</h4>
+            <p class="text-xs text-rovinj-slate mt-1 font-serif line-clamp-2">夕陽餘暉灑在老城石板上，勾勒出極東義大利的浪漫輪廓。</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= PHOTOGRAPHER'S & EXPLORER'S MATRIX ================= -->
+  <section id="field-matrix" class="py-24 bg-white/80 border-b border-rovinj-gold/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rovinj-dark text-rovinj-gold text-xs font-semibold mb-3">
+          <i class="fa-solid fa-compass text-xs"></i>
+          FIELDWORK INSIGHTS ｜ 走讀秘境與光影時刻矩陣
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-rovinj-dark tracking-tight">
+          最佳觀景機位與地中海慢讀指南
+        </h2>
+        <p class="text-rovinj-slate text-sm sm:text-base mt-2 font-serif">
+          為策展深旅者精心彙整的四個經典光影時刻與雙語文彙對照。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        
+        <!-- Slot 1: 晨曦 -->
+        <div class="bg-rovinj-stone/60 rounded-3xl p-6 border border-rovinj-gold/25 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-900 text-xs font-bold font-mono">06:30 - 08:30</span>
+            <i class="fa-solid fa-sun text-amber-500"></i>
+          </div>
+          <h4 class="font-serif font-bold text-lg text-rovinj-dark">晨曦・漁港晨霧與無人老巷</h4>
+          <p class="text-xs text-rovinj-charcoal leading-relaxed font-serif">
+            <strong>機位：</strong>舊港碼頭 (Molo Reale) 及 Trevisol 巷底。<br>
+            <strong>亮點：</strong>漁船歸航卸下沙丁魚，朝陽側光灑在濕潤石板上，無觀光人潮，最能感受漁村質樸氣息。
+          </p>
+        </div>
+
+        <!-- Slot 2: 正午 -->
+        <div class="bg-rovinj-stone/60 rounded-3xl p-6 border border-rovinj-gold/25 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-900 text-xs font-bold font-mono">11:30 - 14:00</span>
+            <i class="fa-solid fa-cloud-sun text-sky-600"></i>
+          </div>
+          <h4 class="font-serif font-bold text-lg text-rovinj-dark">正午・鐘樓頂 360° 群島海天</h4>
+          <p class="text-xs text-rovinj-charcoal leading-relaxed font-serif">
+            <strong>機位：</strong>聖尤菲米亞 60 米鐘樓觀景台。<br>
+            <strong>亮點：</strong>直射陽光透出亞得里亞海翡翠色澤，可清晰俯瞰羅維尼群島 14 座無人島礁與紅瓦屋頂矩陣。
+          </p>
+        </div>
+
+        <!-- Slot 3: 黃昏 -->
+        <div class="bg-rovinj-stone/60 rounded-3xl p-6 border border-rovinj-gold/25 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-900 text-xs font-bold font-mono">18:30 - 20:00</span>
+            <i class="fa-solid fa-mountain-sun text-rose-600"></i>
+          </div>
+          <h4 class="font-serif font-bold text-lg text-rovinj-dark">黃昏・蓬塔科倫特遠眺半島剪影</h4>
+          <p class="text-xs text-rovinj-charcoal leading-relaxed font-serif">
+            <strong>機位：</strong>Zlatni Rt (蓬塔科倫特) 岬角或聖十字之門岩岸。<br>
+            <strong>亮點：</strong>整座半島被落日逆光勾勒出金紅剪影，鐘樓尖頂與飛鳥在夕陽中凝結成永恆畫面。
+          </p>
+        </div>
+
+        <!-- Slot 4: 夜幕 -->
+        <div class="bg-rovinj-stone/60 rounded-3xl p-6 border border-rovinj-gold/25 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-900 text-xs font-bold font-mono">20:30 - 22:30</span>
+            <i class="fa-solid fa-moon text-indigo-600"></i>
+          </div>
+          <h4 class="font-serif font-bold text-lg text-rovinj-dark">夜幕・地窖 Bitinada 漁唱迴響</h4>
+          <p class="text-xs text-rovinj-charcoal leading-relaxed font-serif">
+            <strong>機位：</strong>Spàcio Matika 傳統地窖與濱海酒吧。<br>
+            <strong>亮點：</strong>石造酒窖中傳出老漁民口技無伴奏合唱，石壁反射著浪濤拍岸聲與昏黃暖燈。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Bilingual Vocabulary Matrix -->
+      <div class="bg-rovinj-cream rounded-3xl p-8 border border-rovinj-gold/30 shadow-paper-card">
+        <h4 class="font-serif font-bold text-xl text-rovinj-dark mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-language text-rovinj-gold"></i>
+          極東義大利走讀詞彙對照 (Istrian Bilingual Matrix)
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-serif">
+          <div class="p-3 bg-white rounded-xl border border-rovinj-gold/20">
+            <span class="text-rovinj-slate block">中文 / 意義</span>
+            <strong class="text-rovinj-dark text-sm">羅維尼</strong>
+            <div class="text-rovinj-terracotta mt-1">HR: Rovinj ｜ IT: Rovigno</div>
+          </div>
+          <div class="p-3 bg-white rounded-xl border border-rovinj-gold/20">
+            <span class="text-rovinj-slate block">中文 / 意義</span>
+            <strong class="text-rovinj-dark text-sm">聖尤菲米亞教堂</strong>
+            <div class="text-rovinj-terracotta mt-1">HR: Sv. Eufemija ｜ IT: S. Eufemia</div>
+          </div>
+          <div class="p-3 bg-white rounded-xl border border-rovinj-gold/20">
+            <span class="text-rovinj-slate block">中文 / 意義</span>
+            <strong class="text-rovinj-dark text-sm">平底木造漁船</strong>
+            <div class="text-rovinj-terracotta mt-1">Batana ｜ 家族圖騰帆</div>
+          </div>
+          <div class="p-3 bg-white rounded-xl border border-rovinj-gold/20">
+            <span class="text-rovinj-slate block">中文 / 意義</span>
+            <strong class="text-rovinj-dark text-sm">無伴奏漁人合唱</strong>
+            <div class="text-rovinj-terracotta mt-1">Bitinada ｜ 口技模擬樂器</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FULLSCREEN STATION DETAIL MODAL ================= -->
+  <div id="detail-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
+    <div class="bg-rovinj-paper rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-rovinj-gold/40 relative">
+      <button onclick="closeDetailModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-rovinj-dark/80 text-white flex items-center justify-center hover:bg-rovinj-terracotta transition-all z-20">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="relative h-64 sm:h-80 w-full overflow-hidden rounded-t-3xl">
+        <img id="detail-modal-img" src="" alt="" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-rovinj-dark/90 via-rovinj-dark/30 to-transparent"></div>
+        <div class="absolute bottom-4 left-6 right-6 text-white">
+          <span id="detail-modal-tag" class="text-xs font-cinzel text-rovinj-gold px-2.5 py-0.5 rounded bg-rovinj-gold/20 border border-rovinj-gold/40"></span>
+          <h3 id="detail-modal-title" class="font-serif text-2xl sm:text-3xl font-black mt-1"></h3>
+          <p id="detail-modal-subtitle" class="font-cinzel text-xs text-stone-300"></p>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-8 space-y-6">
+        <div>
+          <h4 class="font-cinzel text-xs font-bold text-rovinj-terracotta uppercase tracking-wider mb-2">CURATORIAL DEEP DIVE 策展深度解析</h4>
+          <p id="detail-modal-desc" class="font-serif text-rovinj-charcoal text-base leading-relaxed"></p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-rovinj-gold/20 shadow-sm space-y-3">
+          <h5 class="font-cinzel text-xs font-bold text-rovinj-slate uppercase">走讀觀察點與細節解密</h5>
+          <ul id="detail-modal-points" class="space-y-2 font-serif text-sm text-rovinj-charcoal"></ul>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-rovinj-gold/20">
+          <div class="flex items-center gap-2 text-xs text-rovinj-slate font-cinzel">
+            <i class="fa-solid fa-location-dot text-rovinj-terracotta"></i>
+            <span id="detail-modal-coords">45.0832° N, 13.6308° E</span>
+          </div>
+          <button onclick="focusOnMapAndClose()" class="px-4 py-2 rounded-xl bg-rovinj-dark text-rovinj-gold hover:bg-rovinj-charcoal text-xs font-bold font-cinzel transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-crosshairs"></i>
+            在地圖上定位
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LIGHTBOX MODAL ================= -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 transition-all duration-300">
+    <div class="relative max-w-4xl w-full bg-rovinj-paper rounded-3xl overflow-hidden shadow-2xl border border-rovinj-gold/40">
+      
+      <!-- Close Button -->
+      <button onclick="closeLightbox()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-rovinj-dark/80 text-white flex items-center justify-center hover:bg-rovinj-terracotta transition-all">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Modal Image Viewport -->
+      <div class="relative h-[320px] sm:h-[450px] bg-black">
+        <img id="modal-img" src="" alt="Lightbox View" class="w-full h-full object-contain" />
+      </div>
+
+      <!-- Modal Caption -->
+      <div class="p-6 bg-white">
+        <h3 id="modal-title" class="font-serif text-2xl font-bold text-rovinj-dark mb-2"></h3>
+        <p id="modal-desc" class="text-sm text-rovinj-charcoal leading-relaxed font-serif"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-rovinj-dark text-rovinj-stone py-16 border-t border-rovinj-gold/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center pb-12 border-b border-rovinj-charcoal">
+        <div class="md:col-span-6 space-y-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-2xl">🏛️</span>
+            <span class="font-cinzel text-xl font-bold text-rovinj-gold">極東義大利・數位策展深旅</span>
+          </div>
+          <p class="text-xs text-rovinj-slate font-serif max-w-md leading-relaxed">
+            以人文地理、空間形構與歷史層疊為核心的跨國文化走讀策展體系。涵蓋弗留利、威尼斯前哨、伊斯特利亞與達爾馬提亞之海洋文明。
+          </p>
+        </div>
+
+        <div class="md:col-span-6 flex flex-wrap md:justify-end gap-3 text-xs font-medium">
+          <a href="../Poreč「波雷奇」/index.html" class="px-4 py-2 rounded-xl bg-rovinj-charcoal text-rovinj-stone hover:text-rovinj-gold hover:bg-stone-800 transition">
+            <i class="fa-solid fa-arrow-left mr-1"></i> 前往波雷奇 (Poreč)
+          </a>
+          <a href="../Aquileia「阿奎萊亞」/index.html" class="px-4 py-2 rounded-xl bg-rovinj-charcoal text-rovinj-stone hover:text-rovinj-gold hover:bg-stone-800 transition">
+            阿奎萊亞 (Aquileia)
+          </a>
+          <a href="#interactive-atlas" class="px-4 py-2 rounded-xl bg-rovinj-venetian text-white hover:bg-rovinj-terracotta transition">
+            <i class="fa-solid fa-map-pin mr-1"></i> 回到地圖
+          </a>
+        </div>
+      </div>
+
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-rovinj-slate font-serif">
+        <p>© 2026 數位策展深旅專題 ｜ 極東義大利文化走讀庫</p>
+        <p class="mt-2 sm:mt-0 font-cinzel text-rovinj-gold">ROVINJ / ROVIGNO ｜ ISTRIA ADRIATICA</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // --- 1. CURATED DATASET (10 STOPS ACROSS ROVINJ WITH EXACT GPS COORDINATES) ---
+    const POI_DATA = [
+      {
+        id: 1,
+        title: "巴爾比之門 (Balbi's Arch, 1679)",
+        originalTitle: "Balbijev luk / Arco dei Balbi",
+        era: "heritage",
+        eraLabel: "威尼斯海防遺存",
+        iconClass: "fa-archway",
+        color: "#942923",
+        coords: [45.08182, 13.63351],
+        image: "./images/balbi_arch.jpg",
+        summary: "1679 年落成的巴洛克拱門，座落於昔日連接島嶼與陸地的吊橋舊址，鐫刻威尼斯聖馬可飛獅。",
+        deepDive: "巴爾比之門取代了中世紀進出島嶼的防禦吊橋。拱門頂部雕刻著總督巴爾比家族盾徽與展開福音書的聖馬可飛獅，拱頂兩側分別刻有威尼斯人與鄂圖曼土耳其人石雕頭像，象徵威尼斯海權與地中海十字路口的歷史風雲。",
+        points: [
+          "頂部開卷聖馬可飛獅（Pax Tibi Marce），象徵和平時期的威尼斯共和國海洋治理。",
+          "穿過拱門即進入昔日島嶼核心，迎面是通往山頂的鵝卵石步道群。"
+        ],
+        audioGuide: "巴爾比之門是進入羅維尼老城的核心門戶，見證了 1763 年填海前島嶼的防禦歷史與威尼斯共和國的榮光。"
+      },
+      {
+        id: 2,
+        title: "羅維尼文化遺產博物館 (Palazzo Califfi)",
+        originalTitle: "Muzej Grada Rovinja / Palazzo Califfi",
+        era: "art",
+        eraLabel: "藝術石階生活",
+        iconClass: "fa-palette",
+        color: "#C89B38",
+        coords: [45.08152, 13.63421],
+        image: "./images/rovinj_panorama_sea.jpg",
+        summary: "設於 17 世紀巴洛克卡利菲宮殿內，典藏羅馬考古出土文物、威尼斯航海圖與伊斯特利亞當代藝術。",
+        deepDive: "由威尼斯貴族 Califfi 家族於 17 世紀建立的四層巴洛克式宮殿。館內收藏了羅維尼海域打撈的羅馬時代沉船陶甕、威尼斯共和國海事文獻與 20 世紀克羅埃西亞名家畫作。",
+        points: [
+          "典藏羅維尼從古羅馬岩礁到威尼斯造船港的珍貴歷史地圖與航海器具。",
+          "宮殿本身的外立面與巴洛克式大門展現了 17 世紀貴族宅邸的優雅風貌。"
+        ],
+        audioGuide: "羅維尼城市博物館典藏了從羅馬時代、威尼斯海權到當代藝術的珍貴文化瑰寶。"
+      },
+      {
+        id: 3,
+        title: "巴塔納生態博物館 (UNESCO 2016)",
+        originalTitle: "Ekomuzej Kuća o batani (UNESCO Register)",
+        era: "heritage",
+        eraLabel: "UNESCO 非遺漁航",
+        iconClass: "fa-sailboat",
+        color: "#0E405F",
+        coords: [45.08201, 13.63382],
+        image: "./images/batana_boat.jpg",
+        summary: "2016 登錄 UNESCO 非遺優秀保護實踐名錄，保存平底木船 Batana 造船技藝與漁民家族圖騰。",
+        deepDive: "Batana 是一種船底扁平、長約 4 至 8 公尺的傳統單桅木造漁船，適應伊斯特利亞多礁岩海域。生態博物館結合了港邊手工造船工作坊、家族船帆圖騰研究，以及漁唱文化（Bitinada）的活態傳承。",
+        points: [
+          "造船工匠現場展示不用金屬釘、純靠木榫與油灰嵌縫的傳統工藝。",
+          "展示每艘 Batana 船帆上專屬各家族的幾何色彩識別符號。"
+        ],
+        audioGuide: "巴塔納生態博物館是歐洲社區型非遺保護的典範，保存了五百年的平底木船與漁民生活智慧。"
+      },
+      {
+        id: 4,
+        title: "格里西亞藝術石階街 (Ulica Grisia)",
+        originalTitle: "Ulica Grisia / Via Grisia",
+        era: "art",
+        eraLabel: "藝術石階生活",
+        iconClass: "fa-stairs",
+        color: "#C89B38",
+        coords: [45.08261, 13.63220],
+        image: "./images/grisia_street.jpg",
+        summary: "貫穿老城中軸的螺旋攀升石階街，白色石灰岩磨得光滑如鏡，每年夏天化身亞得里亞海露天畫廊。",
+        deepDive: "格里西亞街是攀登至山頂聖殿的主幹道。兩旁民居窗台掛滿鮮花，牆面上掛著在地藝術家的油畫與陶瓷雕塑。每年 8 月第二個星期日舉辦的一日露天藝術節（Grisia Art Fair），吸引全歐藝術家在此展出。",
+        points: [
+          "腳下的伊斯特利亞白石板（Pietra d'Istria）被數百年足跡打磨出珍珠般的光澤。",
+          "沿途可見威尼斯哥德式三聯窗與石雕獅頭雨水排放槽。"
+        ],
+        audioGuide: "格里西亞街是羅維尼最浪漫的藝術石階，兩旁遍布當代畫廊與威尼斯式哥德花窗。"
+      },
+      {
+        id: 5,
+        title: "聖尤菲米亞大教堂與鐘樓",
+        originalTitle: "Crkva Sv. Eufemije / Campanile di S. Eufemia",
+        era: "landmark",
+        eraLabel: "老城核心地標",
+        iconClass: "fa-landmark-dome",
+        color: "#B34A38",
+        coords: [45.08324, 13.63082],
+        image: "./images/st_euphemia.jpg",
+        summary: "老城最高峰巴洛克聖殿。60 米鐘樓仿威尼斯聖馬可鐘樓建立，尖頂 4.7 米聖女銅像隨海風旋轉。",
+        deepDive: "大教堂完工於 1736 年，主祭壇後方供奉著西元 800 年奇蹟漂洋過海抵達羅維尼海灘的聖女尤菲米亞（Sveta Eufemija）大理石石棺。60 公尺鐘樓頂立著鍍金青銅聖女雕像，手持棕櫚葉隨 Bora 與 Jugo 風向旋轉，是全城信仰與航海守護中心。",
+        points: [
+          "登上 60 米鐘樓頂可 360 度俯瞰羅維尼群島 14 座無人島礁與蔚藍海天。",
+          "祭壇後方聖匣室供奉著重達數噸的 3 世紀古羅馬大理石雕刻石棺。"
+        ],
+        audioGuide: "您現在來到的是聖尤菲米亞大教堂。這座鐘樓仿照威尼斯聖馬可鐘樓而建，頂端的聖女銅像至今仍指引著海風方向。"
+      },
+      {
+        id: 6,
+        title: "聖十字之門 (Porta di Santa Croce)",
+        originalTitle: "Vrata sv. Križa / Porta di Santa Croce",
+        era: "heritage",
+        eraLabel: "威尼斯海防遺存",
+        iconClass: "fa-door-open",
+        color: "#942923",
+        coords: [45.08381, 13.62985],
+        image: "./images/rovinj_old_town_alleys.jpg",
+        summary: "中世紀臨海防禦城門遺跡，穿過石拱門，台階直接探入亞得里亞海翡翠波濤之中。",
+        deepDive: "羅維尼昔日設有七座防禦城門，聖十字之門是少數完好保留的海門。石階直接向下延伸至海浪之中，昔日供漁民卸載漁獲與戰略補給，如今是凝視亞得里亞海碧藍波濤的絕密機位。",
+        points: [
+          "拱門石壁上刻有中世紀十字護符與石匠標記。",
+          "走出城門即可踩踏在被海水沖刷的光滑海角岩礁上。"
+        ],
+        audioGuide: "穿過聖十字門，石板路直接伸入海水，展現了昔日島民與亞得里亞海零距離共生的姿態。"
+      },
+      {
+        id: 7,
+        title: "特雷維索爾臨海岩岸石階",
+        originalTitle: "Ulica Trevisol Rock Steps & Cliffs",
+        era: "nature",
+        eraLabel: "自然海角森林",
+        iconClass: "fa-water",
+        color: "#5B7A6A",
+        coords: [45.08452, 13.62850],
+        image: "./images/rovinj_sunset.jpg",
+        summary: "羅維尼老城西側最負盛名的無護欄落海石階，夕陽灑落時浪花拍岸，浪漫至極。",
+        deepDive: "特雷維索爾小巷盡頭沒有任何人工護欄，天然石灰岩與彩色外牆直接矗立在海浪之上。傍晚時分，遊客與居民坐在岩石台階上啜飲 Aperol Spritz，凝望夕陽緩緩沉入亞得里亞海。",
+        points: [
+          "欣賞老城彩色房屋外牆緊貼海浪峭壁垂直拔起的建築奇觀。",
+          "黃昏 18:30–20:00 是拍攝老城剪影與落日餘暉的最佳機位。"
+        ],
+        audioGuide: "特雷維索爾小巷是羅維尼最浪漫的角落，夕陽與浪花直接拍打在腳邊的石階上。"
+      },
+      {
+        id: 8,
+        title: "舊港碼頭與海濱長廊 (Molo Reale & Riva)",
+        originalTitle: "Molo Reale & Riva Rovinj",
+        era: "landmark",
+        eraLabel: "老城核心地標",
+        iconClass: "fa-anchor",
+        color: "#B34A38",
+        coords: [45.08051, 13.63502],
+        image: "./images/rovinj_harbor.jpg",
+        summary: "羅維尼最具活力的生活港灣，停泊著傳統漁船與遊艇，彩色建築倒映在如鏡水面。",
+        deepDive: "舊港碼頭是凝望羅維尼水滴半島全景的經典角度。清晨漁船在此卸載新鮮捕撈的沙丁魚與黑墨魚；傍晚岸邊露天咖啡館座無虛席，海水倒映著聖尤菲米亞鐘樓與紅瓦建築群。",
+        points: [
+          "遠眺整座老城山丘向上收束的完美水滴狀天際線。",
+          "可在此搭乘 Batana 木船體驗傳統夜間出海捕魚體驗。"
+        ],
+        audioGuide: "舊港碼頭是凝視羅維尼水滴半島全貌的最佳視角，彩色建築與碧藍海水在此交織。"
+      },
+      {
+        id: 9,
+        title: "斯帕喬傳統漁人地窖 (Spàcio Matika)",
+        originalTitle: "Spàcio Matika / Cantina dei Pescatori",
+        era: "gourmet",
+        eraLabel: "舌尖風土與地窖",
+        iconClass: "fa-utensils",
+        color: "#1A6B8A",
+        coords: [45.08122, 13.63554],
+        image: "./images/istrian_wine.jpg",
+        summary: "羅維尼傳統石造酒窖，品味伊斯特利亞特級初榨橄欖油煎沙丁魚、原生白酒與 Bitinada 複音漁唱。",
+        deepDive: "Spàcio 是羅維尼漁民在結束辛勞航行後聚會的石造地下酒窖。在此不僅能品嚐當天捕獲的野生沙丁魚與冰鎮 Malvazija 原生白酒，還能親耳聆聽老漁民以口技模擬樂器的 Bitinada 無伴奏複音合唱。",
+        points: [
+          "必嚐：現煎野生沙丁魚（Sardele na gradele）佐本地頂級橄欖油。",
+          "必聽：無任何樂器伴奏、純以人聲口技模仿低音大提琴與吉他的 Bitinada 合唱。"
+        ],
+        audioGuide: "在斯帕喬地窖裡，音樂與美食不分彼此，Bitinada 漁唱是世界上最獨特的口技無伴奏複音合唱。"
+      },
+      {
+        id: 10,
+        title: "蓬塔科倫特森林公園 (Zlatni Rt)",
+        originalTitle: "Park šuma Zlatni rt / Punta Corrente",
+        era: "nature",
+        eraLabel: "自然海角森林",
+        iconClass: "fa-tree",
+        color: "#5B7A6A",
+        coords: [45.06802, 13.63201],
+        image: "./images/punta_corrente.jpg",
+        summary: "19 世紀末奧匈海軍男爵打造的百年海濱雪松森林公園，遠眺羅維尼老城全景的極致秘境。",
+        deepDive: "1890 年由奧匈海軍名流喬治·馮·胡特羅特男爵（Johann Georg von Hütterott）買下南側海岬，栽種數萬株地中海雪松、絲柏與阿勒頗松。公園內的垂直石灰岩海崖是全歐洲著名的濱海攀岩聖地，也是遠眺老城落日金光的最佳視角。",
+        points: [
+          "漫步於百年雪松與絲柏林蔭大道，呼吸地中海松針與海鹽交織的芳香空氣。",
+          "岬角海灘可一覽羅維尼老城向外海延伸的完整水滴形輪廓。"
+        ],
+        audioGuide: "蓬塔科倫特森林公園是綠意與海水的交會點，也是遠眺老城半島全景的經典秘境。"
+      }
+    ];
+
+    // --- 2. GLOBAL VARIABLES ---
+    let map = null;
+    let markersLayerGroup = null;
+    let routePolyline = null;
+    let currentFilter = 'all';
+    let activePOI = POI_DATA[0];
+
+    // --- 3. MAP INITIALIZATION (LEAFLET + OPENSTREETMAP OSM SYSTEM) ---
+    function initMap() {
+      // 1. Initialize Map centered on Rovinj Old Town
+      map = L.map('rovinj-map', {
+        center: [45.0818, 13.6330],
+        zoom: 15,
+        zoomControl: true,
+        scrollWheelZoom: false
+      });
+
+      // 2. OpenStreetMap Pure Layer (High-availability Humanitarian OSM Mirror + Robust Fallback, zero 403 blocks)
+      const osmTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c']
+      });
+
+      // Automatic fallback on tile error to CartoDB Voyager or alternate OSM mirror
+      osmTileLayer.on('tileerror', function(e) {
+        if (e.tile && !e.tile._hasFailedOnce) {
+          e.tile._hasFailedOnce = true;
+          e.tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${e.coords.z}/${e.coords.x}/${e.coords.y}.png`;
+        }
+      });
+
+      osmTileLayer.addTo(map);
+
+      // 3. Add Peninsula Walking Axis Route Polyline
+      const routeCoords = POI_DATA.map(item => item.coords);
+      routePolyline = L.polyline(routeCoords, {
+        color: '#B34A38',
+        weight: 4,
+        opacity: 0.9,
+        dashArray: '8, 8',
+        lineCap: 'round'
+      }).addTo(map);
+
+      markersLayerGroup = L.layerGroup().addTo(map);
+      
+      // 4. Render Markers & Vertical Station Rail
+      renderMarkers();
+      setupLeverDrag();
+      selectPOI(1, false);
+    }
+
+    // --- 4. RENDER VERTICAL STATION RAIL & DRAG LEVER ---
+    function renderVerticalStationRail() {
+      const container = document.getElementById('vertical-station-nodes');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const filtered = currentFilter === 'all' 
+        ? POI_DATA 
+        : POI_DATA.filter(item => item.era === currentFilter);
+
+      filtered.forEach((poi) => {
+        const btn = document.createElement('button');
+        btn.id = `v-station-node-${poi.id}`;
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          selectPOI(poi.id, true);
+        };
+        const isActive = poi.id === activePOI.id;
+        btn.className = `w-7 h-7 rounded-lg text-[9px] font-cinzel font-bold transition-all flex items-center justify-center border z-10 ${
+          isActive 
+            ? 'bg-rovinj-venetian text-white border-rovinj-gold shadow-sm scale-110 font-black ring-1 ring-rovinj-gold' 
+            : 'bg-white/95 text-rovinj-charcoal border-stone-300 hover:bg-white hover:text-rovinj-venetian hover:border-rovinj-gold'
+        }`;
+        btn.textContent = `${poi.id < 10 ? '0' : ''}${poi.id}`;
+        btn.title = `第 ${poi.id} 站：${poi.title}`;
+        container.appendChild(btn);
+      });
+    }
+
+    // --- 5. RENDER MAP MARKERS & POI CARDS (TWO-WAY SYNC) ---
+    function renderMarkers() {
+      markersLayerGroup.clearLayers();
+      const poiContainer = document.getElementById('poi-card-container');
+      poiContainer.innerHTML = '';
+
+      const filtered = currentFilter === 'all' 
+        ? POI_DATA 
+        : POI_DATA.filter(item => item.era === currentFilter);
+
+      filtered.forEach((poi) => {
+        // Custom Leaflet DivIcon
+        const customIcon = L.divIcon({
+          className: 'custom-curator-divicon',
+          html: `<div id="marker-${poi.id}" class="custom-curator-marker ${poi.id === activePOI.id ? 'active-marker' : ''}" style="width: 34px; height: 34px; background-color: ${poi.color}; color: white; font-size: 13px;">
+                  <i class="fa-solid ${poi.iconClass}"></i>
+                </div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
+        });
+
+        const marker = L.marker(poi.coords, { icon: customIcon }).addTo(markersLayerGroup);
+        
+        // Popup
+        marker.bindPopup(`
+          <div class="p-2 font-serif max-w-[220px]">
+            <span class="text-[10px] font-cinzel font-bold text-rovinj-terracotta uppercase">${poi.eraLabel}</span>
+            <h4 class="text-sm font-bold text-rovinj-dark mt-0.5">${poi.title}</h4>
+            <p class="text-xs text-rovinj-slate mt-1 line-clamp-2">${poi.summary}</p>
+            <div class="mt-2.5 flex items-center justify-between pt-1 border-t border-rovinj-gold/20">
+              <button onclick="selectPOI(${poi.id}, false); openModalForActive();" class="text-[11px] text-rovinj-venetian font-bold underline">查看完整解析 →</button>
+              <button onclick="toggleSpeechPOI(${poi.id})" class="text-[11px] text-rovinj-gold font-bold flex items-center gap-1"><i class="fa-solid fa-volume-high text-[10px]"></i> 導聽</button>
+            </div>
+          </div>
+        `);
+
+        marker.on('click', () => {
+          selectPOI(poi.id, false);
+        });
+
+        // Clean Vertical Sidebar Card
+        const card = document.createElement('div');
+        card.id = `poi-card-${poi.id}`;
+        card.className = `w-full flex-shrink-0 p-4 rounded-2xl border transition-all cursor-pointer flex gap-3.5 items-start box-border select-none ${
+          poi.id === activePOI.id 
+            ? 'bg-white border-rovinj-gold shadow-md ring-1 ring-rovinj-gold' 
+            : 'bg-white/80 border-stone-200 hover:border-rovinj-gold/50 hover:bg-white'
+        }`;
+        
+        card.onclick = () => {
+          selectPOI(poi.id, true);
+        };
+
+        card.innerHTML = `
+          <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 relative border border-rovinj-gold/30 shadow-sm mt-0.5 pointer-events-none select-none">
+            <img src="${poi.image}" alt="${poi.title}" draggable="false" class="w-full h-full object-cover pointer-events-none" />
+            <span class="absolute top-1 left-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] text-white shadow-md" style="background-color: ${poi.color};">
+              <i class="fa-solid ${poi.iconClass}"></i>
+            </span>
+          </div>
+          <div class="flex-grow min-w-0 pointer-events-none">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[9px] font-cinzel uppercase px-1.5 py-0.2 rounded bg-rovinj-dark/5 text-rovinj-terracotta font-bold">${poi.eraLabel}</span>
+              <span class="text-[10px] text-rovinj-slate font-mono">#0${poi.id}</span>
+            </div>
+            <h4 class="font-serif text-sm font-bold text-rovinj-dark leading-snug mt-1 break-words">${poi.title}</h4>
+            <p class="text-xs text-rovinj-slate font-serif leading-relaxed mt-1 line-clamp-2">${poi.summary}</p>
+          </div>
+          <div class="flex flex-col items-center justify-between self-stretch flex-shrink-0">
+            <i class="fa-solid fa-chevron-right text-xs text-stone-300 mt-1"></i>
+            <button onclick="event.stopPropagation(); toggleSpeechPOI(${poi.id})" id="card-audio-btn-${poi.id}" class="p-1 rounded-lg bg-rovinj-gold/15 text-rovinj-gold hover:bg-rovinj-gold/30 text-[10px] transition" title="導覽語音">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+          </div>
+        `;
+
+        poiContainer.appendChild(card);
+      });
+
+      renderVerticalStationRail();
+    }
+
+    // --- 6. SELECT POI (TWO-WAY INTERACTIVE LINKAGE) ---
+    function selectPOI(id, panTo = true) {
+      const found = POI_DATA.find(p => p.id === id);
+      if (!found) return;
+      activePOI = found;
+
+      // Update Map Marker classes
+      document.querySelectorAll('.custom-curator-marker').forEach(el => el.classList.remove('active-marker'));
+      const activeEl = document.getElementById(`marker-${id}`);
+      if (activeEl) activeEl.classList.add('active-marker');
+
+      // Update Sidebar Cards
+      document.querySelectorAll('[id^="poi-card-"]').forEach(el => {
+        el.className = 'w-full flex-shrink-0 p-4 rounded-2xl border transition-all cursor-pointer flex gap-3.5 items-start box-border select-none bg-white/80 border-stone-200 hover:border-rovinj-gold/50 hover:bg-white';
+      });
+      const activeCard = document.getElementById(`poi-card-${id}`);
+      if (activeCard) {
+        activeCard.className = 'w-full flex-shrink-0 p-4 rounded-2xl border transition-all cursor-pointer flex gap-3.5 items-start box-border select-none bg-white border-rovinj-gold shadow-md ring-1 ring-rovinj-gold';
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // Update Vertical Station Rail Nodes
+      document.querySelectorAll('[id^="v-station-node-"]').forEach(el => {
+        el.className = 'w-7 h-7 rounded-lg text-[9px] font-cinzel font-bold transition-all flex items-center justify-center border z-10 bg-white/95 text-rovinj-charcoal border-stone-300 hover:bg-white hover:text-rovinj-venetian hover:border-rovinj-gold';
+      });
+      const activeNode = document.getElementById(`v-station-node-${id}`);
+      if (activeNode) {
+        activeNode.className = 'w-7 h-7 rounded-lg text-[9px] font-cinzel font-bold transition-all flex items-center justify-center border z-10 bg-rovinj-venetian text-white border-rovinj-gold shadow-sm scale-110 font-black ring-1 ring-rovinj-gold';
+      }
+
+      // Update Floating Bottom Badge
+      document.getElementById('badge-icon').innerHTML = `<i class="fa-solid ${found.iconClass}"></i>`;
+      document.getElementById('badge-icon').style.backgroundColor = found.color;
+      document.getElementById('badge-title').textContent = found.title;
+      document.getElementById('badge-subtitle').textContent = `${found.eraLabel} • ${found.originalTitle}`;
+
+      // Update Lever Thumb Text
+      const thumbText = document.getElementById('lever-thumb-text');
+      if (thumbText) thumbText.textContent = `${found.id < 10 ? '0' : ''}${found.id}`;
+
+      // Pan map to POI
+      if (panTo && map) {
+        map.flyTo(found.coords, 17, { duration: 0.9 });
+      }
+
+      setTimeout(updateLeverPosition, 180);
+    }
+
+    // --- 7. LEVER DRAG & SCROLL NAVIGATION ---
+    function setupLeverDrag() {
+      const track = document.getElementById('lever-track');
+      const thumb = document.getElementById('lever-thumb');
+      const container = document.getElementById('poi-card-container');
+      if (!track || !thumb || !container) return;
+
+      let isDragging = false;
+      let startY = 0;
+      let startTop = 0;
+
+      const onMouseDown = (e) => {
+        isDragging = true;
+        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        startTop = parseFloat(thumb.style.top) || 32;
+        document.body.classList.add('select-none');
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('touchmove', onMouseMove, { passive: false });
+        document.addEventListener('touchend', onMouseUp);
+      };
+
+      const onMouseMove = (e) => {
+        if (!isDragging) return;
+        if (e.cancelable) e.preventDefault();
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        const deltaY = clientY - startY;
+        const trackHeight = track.clientHeight - 64; // accounting for buttons
+        let newTop = Math.max(32, Math.min(32 + trackHeight, startTop + deltaY));
+        thumb.style.top = `${newTop}px`;
+
+        const scrollPercent = (newTop - 32) / trackHeight;
+        container.scrollTop = scrollPercent * (container.scrollHeight - container.clientHeight);
+      };
+
+      const onMouseUp = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        document.body.classList.remove('select-none');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onMouseMove);
+        document.removeEventListener('touchend', onMouseUp);
+      };
+
+      thumb.addEventListener('mousedown', onMouseDown);
+      thumb.addEventListener('touchstart', onMouseDown, { passive: false });
+
+      container.addEventListener('scroll', () => {
+        if (!isDragging) {
+          updateLeverPosition();
+        }
+      });
+    }
+
+    function updateLeverPosition() {
+      const track = document.getElementById('lever-track');
+      const thumb = document.getElementById('lever-thumb');
+      const container = document.getElementById('poi-card-container');
+      if (!track || !thumb || !container) return;
+
+      const trackHeight = track.clientHeight - 64;
+      const scrollPercent = container.scrollTop / (container.scrollHeight - container.clientHeight || 1);
+      const newTop = 32 + scrollPercent * trackHeight;
+      thumb.style.top = `${newTop}px`;
+    }
+
+    function scrollPoiList(direction) {
+      const currentIndex = POI_DATA.findIndex(p => p.id === activePOI.id);
+      let nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (nextIndex < 0) nextIndex = 0;
+      if (nextIndex >= POI_DATA.length) nextIndex = POI_DATA.length - 1;
+      selectPOI(POI_DATA[nextIndex].id, true);
+    }
+
+    function fitMapToRoute() {
+      if (map && routePolyline) {
+        map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+      }
+    }
+
+    // --- 8. HISTORICAL FILTERING ---
+    function filterMarkers(era) {
+      currentFilter = era;
+      document.querySelectorAll('#poi-filters .filter-btn').forEach(btn => {
+        if (btn.dataset.era === era) {
+          btn.className = 'filter-btn active-filter px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-venetian text-white shadow-sm transition-all';
+        } else {
+          btn.className = 'filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-rovinj-stone text-rovinj-charcoal hover:bg-rovinj-venetian hover:text-white transition-all';
+        }
+      });
+
+      renderMarkers();
+
+      const filtered = era === 'all' ? POI_DATA : POI_DATA.filter(item => item.era === era);
+      if (filtered.length > 0) {
+        selectPOI(filtered[0].id, true);
+      }
+    }
+
+    // --- 9. MODAL DETAILS ---
+    function openModalForActive() {
+      if (!activePOI) return;
+      const modal = document.getElementById('detail-modal');
+      document.getElementById('detail-modal-img').src = activePOI.image;
+      document.getElementById('detail-modal-tag').textContent = activePOI.eraLabel;
+      document.getElementById('detail-modal-title').textContent = activePOI.title;
+      document.getElementById('detail-modal-subtitle').textContent = activePOI.originalTitle;
+      document.getElementById('detail-modal-desc').textContent = activePOI.deepDive;
+      document.getElementById('detail-modal-coords').textContent = `${activePOI.coords[0]}° N, ${activePOI.coords[1]}° E`;
+
+      const pointsContainer = document.getElementById('detail-modal-points');
+      pointsContainer.innerHTML = '';
+      activePOI.points.forEach(point => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2.5';
+        li.innerHTML = `<i class="fa-solid fa-circle-check text-rovinj-gold text-xs flex-shrink-0 mt-1"></i> <span>${point}</span>`;
+        pointsContainer.appendChild(li);
+      });
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+    }
+
+    function focusOnMapAndClose() {
+      closeDetailModal();
+      document.getElementById('interactive-atlas').scrollIntoView({ behavior: 'smooth' });
+      selectPOI(activePOI.id, true);
+    }
+
+    /* ================= 3. STRATA SWITCHER ================= */
+    const strataContent = {
+      1: {
+        title: "I. 羅馬避難岩礁 (西元前 - VI 世紀)：孤懸海上的 Mons Albanus",
+        subtitle: "Arupium & Castrum Rubini ｜ 伊斯特利亞原住民與羅馬海防哨站",
+        content: `
+          在羅馬帝國時期，羅維尼被稱為 <em>Mons Albanus</em> 或 <em>Castrum Rubini</em>。在 5 世紀西羅馬帝國崩潰後，亞得里亞海沿岸遭遇阿瓦爾人（Avars）與斯拉夫人的侵襲，周邊平原與農業聚落的居民紛紛逃往這座孤懸於海上、易守難攻的石灰岩小島。
+          <br><br>
+          島民在懸崖邊堆疊石塊築成防禦石牆，以捕魚與採集橄欖為生。極端有限的島嶼面積，塑造了羅維尼日後垂直向高處發展、屋舍緊密相依的微型衛城格局。
+        `,
+        highlights: [
+          "孤島避難所型制：四周環海，僅有一條狹窄海峽隔絕陸地",
+          "石材開採：伊斯特利亞緻密白色石灰岩（Pietra d'Istria）",
+          "羅馬考古殘留：出土羅馬硬幣、橄欖油陶甕（Amphorae）碎片"
+        ]
+      },
+      2: {
+        title: "II. 聖女石棺神蹟 (西元 800 年)：守護聖女與信仰磐石",
+        subtitle: "The Miracle of Saint Euphemia ｜ 漂洋過海的大理石棺與小男孩的奇蹟",
+        content: `
+          西元 800 年 7 月 13 日拂曉，一具沉重無比的巨大羅馬大理石石棺在驚濤駭浪中漂抵羅維尼海灘。全城的居民、士兵與壯碩公牛嘗試拉動石棺皆告失敗。此時，一名純潔的小男孩帶著兩隻小牛走向海邊，在眾人屏息中輕巧地將石棺拉上山巔。
+          <br><br>
+          打開石棺，裡面躺著西元 304 年在君士坦丁堡對岸卡爾西頓殉道的基督徒少女聖尤菲米亞（Saint Euphemia）。羅維尼從此奉她為全城守護者，山頂大教堂成為亞得里亞海重要的朝聖中心。
+        `,
+        highlights: [
+          "神聖石棺：長約 2.5 米、重達數噸的古羅馬大理石雕棺",
+          "朝聖核心：全伊斯特利亞與威尼斯水手祈求海航平安的信仰樞紐",
+          "每年 9 月 16 日聖尤菲米亞慶典：數萬信眾齊聚老城山丘"
+        ]
+      },
+      3: {
+        title: "III. 威尼斯最寧靜共和國 (1283 - 1797)：海權五百年與石雕蕾絲",
+        subtitle: "Serenissima Repubblica di Venezia ｜ 填海連島與巴洛克繁盛時代",
+        content: `
+          1283 年，羅維尼正式宣誓臣服於威尼斯共和國，成為「威尼斯海洋領地」（Stato da Màr）不可或缺的海軍據點與引航員搖籃。威尼斯人在此採購優質石材、建造船隻，並在城內留下無數帶有聖馬可飛獅的巴洛克門廊與花飾哥德窗櫺。
+          <br><br>
+          隨著人口激增，<strong>1763 年威尼斯當局正式下令填平島嶼與陸地之間的海峽（Canale della Roggia）</strong>，吊橋拆除，巴爾比之門落成，羅維尼正式與陸地相連，經濟與文化達到空前繁盛。
+        `,
+        highlights: [
+          "1763 填海工程：孤島轉型為今日的水滴狀半島",
+          "1679 巴爾比之門：巴洛克城門與開卷聖馬可飛獅",
+          "1758 鐘樓風向標：4.7 米聖尤菲米亞青銅旋轉雕像"
+        ]
+      },
+      4: {
+        title: "IV. 奧匈海濱與造船盛世 (1813 - 1918)：奧地利蔚藍海岸的誕生",
+        subtitle: "Austrian Riviera & Maritime Industry ｜ 鐵道連接、煙草工廠與海濱療養",
+        content: `
+          威尼斯共和國覆滅後，羅維尼併入哈布斯堡奧匈帝國版圖。奧地利人將其打造成亞得里亞海重要的工業與海濱療養重鎮，建立了當時歐洲最大的煙草工廠、沙丁魚罐頭廠以及海洋生物研究所（Institute of Marine Biology）。
+          <br><br>
+          1890 年，奧地利海軍名流喬治·馮·胡特羅特男爵（Johann Georg von Hütterott）買下南側海岬，栽種數萬株地中海雪松與絲柏，打造出舉世聞名的<strong>蓬塔科倫特森林公園 (Zlatni Rt)</strong>。
+        `,
+        highlights: [
+          "工業現代化：1872 煙草工廠、1876 鐵路支線通車",
+          "海洋科研：1891 成立歐洲最古老海洋研究所之一",
+          "生態景觀：蓬塔科倫特（黃金角）雪松林與貴族渡假莊園"
+        ]
+      },
+      5: {
+        title: "V. 當代雙語活態遺產 (UNESCO 至今)：地中海慢生活的非遺典範",
+        subtitle: "Bilingual Living Heritage & UNESCO Register ｜ Batana 生態博物館與伊斯特利亞多元文化",
+        content: `
+          今日的羅維尼是克羅埃西亞境內最國際化且保留純粹雙語（義大利語與克羅埃西亞語）的城市。街道名稱皆以雙語並列，居民以其威尼斯文化根源與地中海漁業傳統為傲。
+          <br><br>
+          2016 年，致力於保存傳統平底木船 Batana、漁民複音合唱 Bitinada 與地窖聚會的<strong>「巴塔納生態博物館」(Eco-Museum Batana)</strong> 被 UNESCO 登錄為非物質文化遺產優秀保護實踐名錄，向世人展示了文化遺產與現代生活共榮的完美典範。
+        `,
+        highlights: [
+          "UNESCO 2016 非遺優秀保護實踐名錄（Batana 生態博物館）",
+          "伊斯特利亞雙語文化自治典範",
+          "地中海慢食（Slow Food）與頂級初榨橄欖油重鎮"
+        ]
+      }
+    };
+
+    function switchStrata(index) {
+      // Update Button Styles
+      document.querySelectorAll('.strata-tab').forEach(b => {
+        b.className = "strata-tab px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-white text-rovinj-charcoal border border-rovinj-gold/30 hover:bg-rovinj-stone transition-all";
+      });
+      const activeBtn = document.getElementById(`strata-btn-${index}`);
+      if (activeBtn) {
+        activeBtn.className = "strata-tab active px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-rovinj-dark text-rovinj-gold shadow-md transition-all";
+      }
+
+      const data = strataContent[index];
+      const viewport = document.getElementById('strata-content-viewport');
+      
+      viewport.style.opacity = '0';
+      setTimeout(() => {
+        viewport.innerHTML = `
+          <div class="space-y-6 font-serif">
+            <div>
+              <span class="text-xs font-cinzel font-bold text-rovinj-gold tracking-widest block uppercase">${data.subtitle}</span>
+              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-rovinj-dark mt-1">${data.title}</h3>
+            </div>
+            
+            <div class="text-sm sm:text-base text-rovinj-charcoal leading-relaxed space-y-4">
+              <p>${data.content}</p>
+            </div>
+
+            <div class="pt-6 border-t border-rovinj-gold/20">
+              <h4 class="text-xs font-cinzel font-bold text-rovinj-terracotta tracking-wider uppercase mb-3">核心歷史特徵 (Key Attributes)</h4>
+              <ul class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                ${data.highlights.map(h => `
+                  <li class="bg-rovinj-stone/60 p-3.5 rounded-xl border border-rovinj-gold/20 text-xs text-rovinj-dark flex items-start gap-2">
+                    <i class="fa-solid fa-check text-rovinj-gold mt-0.5"></i>
+                    <span>${h}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+        viewport.style.opacity = '1';
+      }, 200);
+    }
+
+    /* ================= 4. HERO IMAGE SELECTOR ================= */
+    function changeHeroImage(src, title, desc, tag) {
+      const img = document.getElementById('hero-main-img');
+      img.style.opacity = '0.4';
+      setTimeout(() => {
+        img.src = src;
+        document.getElementById('hero-img-title').innerText = title;
+        document.getElementById('hero-img-desc').innerText = desc;
+        document.getElementById('hero-img-tag').innerText = tag;
+        img.style.opacity = '1';
+      }, 250);
+    }
+
+    /* ================= 5. LIGHTBOX MODAL LOGIC ================= */
+    function openLightbox(src, title, desc) {
+      const modal = document.getElementById('lightbox-modal');
+      document.getElementById('modal-img').src = src;
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-desc').innerText = desc;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    /* ================= 6. WEB AUDIO API SYNTHESIZER (OCEAN WAVES & BELL) ================= */
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let waveNode = null;
+    let waveGain = null;
+    let bellInterval = null;
+
+    function initAmbientAudio() {
+      const btn = document.getElementById('ambient-audio-btn');
+      const label = document.getElementById('audio-btn-label');
+
+      if (!isAudioPlaying) {
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContext();
+        }
+
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        // Generate Pink Noise for Adriatic Sea Waves
+        const bufferSize = audioCtx.sampleRate * 2;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          output[i] *= 0.11;
+          b6 = white * 0.115926;
+        }
+
+        waveNode = audioCtx.createBufferSource();
+        waveNode.buffer = noiseBuffer;
+        waveNode.loop = true;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(320, audioCtx.currentTime);
+
+        // LFO for wave swelling
+        const lfo = audioCtx.createOscillator();
+        lfo.frequency.setValueAtTime(0.12, audioCtx.currentTime); // Wave swell every ~8 seconds
+        const lfoGain = audioCtx.createGain();
+        lfoGain.gain.setValueAtTime(180, audioCtx.currentTime);
+        lfo.connect(lfoGain);
+        lfoGain.connect(filter.frequency);
+        lfo.start();
+
+        waveGain = audioCtx.createGain();
+        waveGain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+
+        waveNode.connect(filter);
+        filter.connect(waveGain);
+        waveGain.connect(audioCtx.destination);
+        waveNode.start();
+
+        // Subtle harmonic bell toll every 15 seconds
+        playHarmonicBell();
+        bellInterval = setInterval(playHarmonicBell, 15000);
+
+        isAudioPlaying = true;
+        btn.classList.replace('bg-rovinj-dark', 'bg-rovinj-terracotta');
+        label.innerText = '情境音：播放中';
+      } else {
+        if (waveNode) {
+          waveNode.stop();
+          waveNode.disconnect();
+          waveNode = null;
+        }
+        if (bellInterval) {
+          clearInterval(bellInterval);
+          bellInterval = null;
+        }
+        isAudioPlaying = false;
+        btn.classList.replace('bg-rovinj-terracotta', 'bg-rovinj-dark');
+        label.innerText = '海潮與鐘鳴：開';
+      }
+    }
+
+    function playHarmonicBell() {
+      if (!audioCtx || !isAudioPlaying) return;
+      const now = audioCtx.currentTime;
+      
+      const freqs = [330, 660, 990]; // E4 harmonic
+      freqs.forEach((f, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now);
+        
+        gain.gain.setValueAtTime(0.04 / (idx + 1), now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.5);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 3.5);
+      });
+    }
+
+    document.getElementById('ambient-audio-btn').addEventListener('click', initAmbientAudio);
+
+    /* ================= 7. TTS WEB SPEECH API AUDIO GUIDE & DYNAMIC CONTROLS ================= */
+    let currentSpeakingPOI = null;
+    let isSpeaking = false;
+
+    function toggleSpeechPOI(poiId) {
+      const poi = poiData.find(p => p.id === poiId);
+      if (!poi) return;
+
+      if (isSpeaking && currentSpeakingPOI === poiId) {
+        stopAllSpeech();
+      } else {
+        currentSpeakingPOI = poiId;
+        speakText(poi.title, `${poi.title}。${poi.audioGuide}`);
+      }
+    }
+
+    function speakText(title, text) {
+      if (!('speechSynthesis' in window)) {
+        alert("您的瀏覽器暫不支援 Web Speech 語音朗讀功能。");
+        return;
+      }
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-TW';
+      utterance.rate = 0.95;
+
+      utterance.onstart = () => {
+        isSpeaking = true;
+        showAudioHud(title, text);
+        updateSpeechUIState(true, title);
+      };
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        currentSpeakingPOI = null;
+        hideAudioHud();
+        updateSpeechUIState(false);
+      };
+
+      utterance.onerror = (e) => {
+        isSpeaking = false;
+        currentSpeakingPOI = null;
+        hideAudioHud();
+        updateSpeechUIState(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopAllSpeech() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      isSpeaking = false;
+      currentSpeakingPOI = null;
+      hideAudioHud();
+      updateSpeechUIState(false);
+    }
+
+    function muteAllAudio() {
+      stopAllSpeech();
+      if (isAudioPlaying) {
+        initAmbientAudio(); // toggles off
+      }
+    }
+
+    function updateSpeechUIState(speaking, title = '') {
+      // Top nav stop button
+      const topStopBtn = document.getElementById('stop-speech-btn');
+      if (topStopBtn) {
+        if (speaking) {
+          topStopBtn.classList.remove('hidden');
+          topStopBtn.classList.add('flex');
+        } else {
+          topStopBtn.classList.add('hidden');
+          topStopBtn.classList.remove('flex');
+        }
+      }
+
+      // Sync POI card buttons
+      poiData.forEach(poi => {
+        const cardBtn = document.getElementById(`card-audio-btn-${poi.id}`);
+        if (cardBtn) {
+          if (speaking && currentSpeakingPOI === poi.id) {
+            cardBtn.innerHTML = '<i class="fa-solid fa-stop text-[10px] text-white"></i> 停止';
+            cardBtn.className = "px-2.5 py-1 rounded-lg bg-rovinj-terracotta text-white text-[11px] font-semibold flex items-center gap-1 transition animate-pulse";
+          } else {
+            cardBtn.innerHTML = '<i class="fa-solid fa-volume-high text-[10px] text-rovinj-gold"></i> 導聽';
+            cardBtn.className = "px-2.5 py-1 rounded-lg bg-rovinj-gold/15 text-rovinj-dark hover:bg-rovinj-gold/30 text-[11px] font-semibold flex items-center gap-1 transition";
+          }
+        }
+
+        const popupBtn = document.getElementById(`popup-audio-btn-${poi.id}`);
+        if (popupBtn) {
+          if (speaking && currentSpeakingPOI === poi.id) {
+            popupBtn.innerHTML = '<i class="fa-solid fa-stop text-[10px]"></i> 停止朗讀';
+            popupBtn.className = "flex-1 py-1 text-[11px] font-bold rounded-lg bg-rovinj-terracotta text-white flex items-center justify-center gap-1.5 hover:bg-rovinj-venetian transition";
+          } else {
+            popupBtn.innerHTML = '<i class="fa-solid fa-volume-high text-[10px]"></i> 語音導覽';
+            popupBtn.className = "flex-1 py-1 text-[11px] font-bold rounded-lg bg-rovinj-dark text-rovinj-gold flex items-center justify-center gap-1.5 hover:bg-rovinj-charcoal transition";
+          }
+        }
+      });
+
+      // Sync Hero Intro Button
+      const heroBtn = document.getElementById('hero-intro-audio-btn');
+      if (heroBtn) {
+        if (speaking && currentSpeakingPOI === 'intro') {
+          heroBtn.innerHTML = '<i class="fa-solid fa-stop text-white"></i> <span>停止策展人導聆</span>';
+          heroBtn.className = "inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-rovinj-terracotta text-white border border-rovinj-terracotta hover:bg-rovinj-venetian font-medium transition-all shadow-md animate-pulse";
+        } else {
+          heroBtn.innerHTML = '<i class="fa-solid fa-volume-high text-rovinj-gold"></i> <span>聆聽策展人導聆</span>';
+          heroBtn.className = "inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-rovinj-gold/15 text-rovinj-dark border border-rovinj-gold/40 hover:bg-rovinj-gold/25 font-medium transition-all";
+        }
+      }
+    }
+
+    function showAudioHud(title, text) {
+      const hud = document.getElementById('floating-audio-hud');
+      if (!hud) return;
+      document.getElementById('hud-audio-title').innerText = title || '羅維尼策展導覽';
+      document.getElementById('hud-audio-snippet').innerText = text || '語音導讀進行中...';
+      hud.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
+      hud.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+    }
+
+    function hideAudioHud() {
+      const hud = document.getElementById('floating-audio-hud');
+      if (!hud) return;
+      hud.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      hud.classList.add('translate-y-32', 'opacity-0', 'pointer-events-none');
+    }
+
+    function toggleAmbientFromHud() {
+      initAmbientAudio();
+      const hudLabel = document.getElementById('hud-ambient-label');
+      if (hudLabel) {
+        hudLabel.innerText = isAudioPlaying ? '海潮關' : '海潮開';
+      }
+    }
+
+    function toggleIntroduction() {
+      if (isSpeaking && currentSpeakingPOI === 'intro') {
+        stopAllSpeech();
+      } else {
+        currentSpeakingPOI = 'intro';
+        speakText("策展人導聆", "歡迎來到羅維尼。這座亞得里亞海上的水滴半島，以聖馬可的翅膀作帆，在伊斯特利亞的蔚藍中永恆靠岸。西元 1763 年填海前，它曾是一座獨立的避難孤島。請點擊互動地圖，開啟您的空間走讀之旅。");
+      }
+    }
+
+    /* ================= 8. INITIALIZATION ON DOM READY ================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      switchStrata(1);
+    });
+  </script>
+
+  <!-- ================= FLOATING AUDIO GUIDE CONTROLLER HUD ================= -->
+  <div id="floating-audio-hud" class="fixed bottom-6 right-6 z-50 bg-rovinj-dark/95 text-white backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-rovinj-gold/40 max-w-sm w-[calc(100vw-3rem)] sm:w-80 transform translate-y-32 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <!-- Animated Waveform -->
+        <div class="flex items-end gap-0.5 h-3.5" id="hud-waveform">
+          <span class="w-1 bg-rovinj-gold rounded-full h-2 animate-pulse"></span>
+          <span class="w-1 bg-rovinj-gold rounded-full h-3.5 animate-bounce"></span>
+          <span class="w-1 bg-rovinj-gold rounded-full h-1.5 animate-pulse"></span>
+          <span class="w-1 bg-rovinj-gold rounded-full h-3 animate-bounce"></span>
+        </div>
+        <span class="text-[11px] font-cinzel font-bold text-rovinj-gold uppercase tracking-wider">AUDIO GUIDE PLAYER</span>
+      </div>
+      <button onclick="hideAudioHud()" class="text-stone-400 hover:text-white text-xs p-1" title="收起播音面板">
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+    </div>
+
+    <div class="mb-3">
+      <h5 id="hud-audio-title" class="font-serif font-bold text-sm text-stone-100 truncate">策展人語音導聆</h5>
+      <p id="hud-audio-snippet" class="text-[11px] text-stone-400 font-serif line-clamp-1 mt-0.5">正在為您導覽中...</p>
+    </div>
+
+    <div class="flex items-center justify-between gap-2">
+      <button onclick="stopAllSpeech()" class="flex-1 py-1.5 px-3 rounded-xl bg-rovinj-terracotta hover:bg-rovinj-venetian text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition-all">
+        <i class="fa-solid fa-stop text-[10px]"></i> 停止導覽
+      </button>
+      <button onclick="toggleAmbientFromHud()" id="hud-ambient-btn" class="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-water text-[10px] text-rovinj-gold"></i> <span id="hud-ambient-label">海潮音</span>
+      </button>
+      <button onclick="muteAllAudio()" class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white text-xs transition" title="全部靜音（停止導覽與情境音）">
+        <i class="fa-solid fa-volume-xmark text-xs"></i>
+      </button>
+    </div>
+  </div>
+</body>
+</html>
